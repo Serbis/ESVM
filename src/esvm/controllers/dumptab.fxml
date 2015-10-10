@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox fx:id="vBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="esvm.controllers.FXMLADumpTab">
+   <children>
+      <SplitPane dividerPositions="0.7658862876254181" orientation="VERTICAL" prefHeight="600" prefWidth="1200">
+        <items>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+               <children>
+                  <SplitPane dividerPositions="0.7686781609195402" layoutX="14.0" layoutY="14.0" prefHeight="432.0" prefWidth="1179.0">
+                    <items>
+                      <AnchorPane  minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                           <children>
+                              <ScrollPane prefHeight="430.0" prefWidth="901.0" pannable="true" fx:id="hexScroll">
+                                <content>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="430.0" prefWidth="901.0" fx:id="hexPane" />
+                                </content>
+                              </ScrollPane>
+                           </children></AnchorPane>
+                      <AnchorPane fx:id="asciiPane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" />
+                    </items>
+                  </SplitPane>
+               </children>
+            </AnchorPane>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+               <children>
+                  <VBox prefHeight="130.0" prefWidth="1186.0">
+                     <children>
+                        <HBox prefHeight="100.0" prefWidth="200.0">
+                           <children>
+                              <Label prefHeight="16.0" prefWidth="125.0" text="8-бит со знаком" />
+                              <TextField fx:id="et8bitS" />
+                              <Label prefHeight="16.0" prefWidth="210.0" text="32-бита со сзнаком" />
+                              <TextField fx:id="et32bitS" />
+                              <Label prefHeight="16.0" prefWidth="160.0" text="Шестнадцетиричное" />
+                              <TextField fx:id="ethex" />
+                           </children>
+                        </HBox>
+                        <HBox prefHeight="100.0" prefWidth="200.0">
+                           <children>
+                              <Label prefHeight="16.0" prefWidth="125.0" text="8-бит без знака" />
+                              <TextField fx:id="et8bit" />
+                              <Label prefHeight="16.0" prefWidth="210.0" text="32-бита без знака" />
+                              <TextField fx:id="et32bit" />
+                              <Label prefHeight="16.0" prefWidth="160.0" text="Восьмеричное" />
+                              <TextField fx:id="etoctal" />
+                           </children>
+                        </HBox>
+                        <HBox prefHeight="100.0" prefWidth="200.0">
+                           <children>
+                              <Label prefHeight="16.0" prefWidth="125.0" text="16-бит со знаком" />
+                              <TextField fx:id="et16bitS" />
+                              <Label prefHeight="16.0" prefWidth="210.0" text="32-бита с плавающей точкой" />
+                              <TextField fx:id="et32bitD" />
+                              <Label prefHeight="16.0" prefWidth="160.0" text="Двоичное" />
+                              <TextField fx:id="etbin" />
+                           </children>
+                        </HBox>
+                        <HBox prefHeight="17.0" prefWidth="1186.0">
+                           <children>
+                              <Label prefHeight="16.0" prefWidth="125.0" text="16-бит без знака" />
+                              <TextField fx:id="et16bit" />
+                              <Label prefHeight="16.0" prefWidth="210.0" text="64-бита с плавающей точкой" />
+                              <TextField fx:id="et64bitD" />
+                           </children>
+                        </HBox>
+                        <HBox prefHeight="12.0" prefWidth="1186.0">
+                           <children>
+                              <CheckBox fx:id="cbxRealTime" onAction="#handleslcbxRealTimeAction" prefHeight="18.0" prefWidth="158.0" text="Rael-time вывод" />
+                              <Button fx:id="btnRefresh" onAction="#handleslbtnRefreshAction" text="Обновить" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </children>
+            </AnchorPane>
+        </items>
+      </SplitPane>
+   </children>
+</VBox>
