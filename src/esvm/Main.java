@@ -14,7 +14,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         App app = new App();
-
+        //Bla bla
         FXMLAMain fxmlaMain;
         FXMLLoader loader = new FXMLLoader(getClass().getResource("controllers/main.fxml"));
         VBox pane = null;
