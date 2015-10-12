@@ -8,6 +8,8 @@ import esvm.fields.ByteModel;
 import esvm.vm.ESVM;
 import esvm.vm.desc.Pointer;
 import esvm.vm.desc.Vmspec;
+import esvm.vm.exceptions.MemoryAllocateException;
+import esvm.vm.exceptions.MemoryNullBlockException;
 import esvm.vm.exceptions.MemoryOutOfRangeException;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -35,10 +37,35 @@ public class App {
 
 
     public App() {
-        esvm = new ESVM(new Vmspec(128, 2));
+        esvm = new ESVM(new Vmspec(128, 2, 128));
         try {
-            esvm.getMemoryManager().write(new Pointer(2, 0), new byte[] {127, 127});
+            esvm.getMemoryManager().write(new Pointer(0, 127), new byte[] {45});
+            esvm.getMemoryManager().write(new Pointer(1, 0), new byte[] {127, 127});
+            //byte[] bytes = esvm.getMemoryManager().read(new Pointer(1, 127), 3);
+            //String[] hexes = new String[bytes.length];
+            //for (int i = 0; i < bytes.length; i++) {
+            //    hexes[i] = Integer.toHexString(bytes[i]);
+            //}
+            //StandartDialogs.showErrorDialog("READ", String.valueOf(hexes[0] + hexes[1] + hexes[2]));
+            //Pointer alpointer = esvm.getMemoryManager().allocate(4);
+            //esvm.getMemoryManager().allocate(2);
+            //esvm.getMemoryManager().allocate(4);
+            //for (int i = 0; i < 61; i++) {
+           //     esvm.getMemoryManager().allocate(4);
+           // }
+            //esvm.getMemoryManager().writeBlock(new Pointer(1, 2), new byte[]{34, 34, 34, 34});
+           // esvm.getMemoryManager().writeBlock(new Pointer(1, 6), new byte[]{22, 22, 22, 22});
+            //esvm.getMemoryManager().writeBlock(new Pointer(1, 10), new byte[]{43, 43, 43, 43});
+            esvm.getMemoryManager().callocate(new Pointer(1, 6), 4);
+            esvm.getMemoryManager().callocate(new Pointer(0, 0), 4);
+            esvm.getMemoryManager().writeBlock(new Pointer(1, 6), new byte[]{22, 22, 22, 22});
+            esvm.getMemoryManager().rellocate(new Pointer(1, 6), new Pointer(0, 4));
+
         } catch (MemoryOutOfRangeException e) {
+            e.printStackTrace();
+        } catch (MemoryAllocateException e) {
+            e.printStackTrace();
+        } catch (MemoryNullBlockException e) {
             e.printStackTrace();
         }
         instance = this;
@@ -160,13 +187,11 @@ public class App {
         try {
             RandomAccessFile raf = new RandomAccessFile(file, "rw");
             raf.seek(offset);
-            int bss;
+            int bss = 8;
             int bsslen;
             if (delsign) {
-                bss = 8;
                 bsslen = bs + 8;
             } else {
-                bss = 0;
                 bsslen = bs;
             }
             for (int i = bss; i < bsslen; i++) {

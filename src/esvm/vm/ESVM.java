@@ -18,7 +18,7 @@ public class ESVM {
     public ESVM(Vmspec vmspec) {
         memoryManager = new MemoryManager();
         try {
-            memoryManager.determineMemory(vmspec.memory_bs, vmspec.memory_blockcount);
+            memoryManager.determineMemory(vmspec.memory_bs, vmspec.memory_blockcount, vmspec.memory_stacksize);
         } catch (MemoryDetermineException e) {
             e.printStackTrace();
         }

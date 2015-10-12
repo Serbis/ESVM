@@ -1,12 +1,8 @@
 package esvm.vm;
 
-import esvm.fields.Address;
 import esvm.vm.desc.Block;
 import esvm.vm.desc.Pointer;
-import esvm.vm.exceptions.MemoryAllocateException;
-import esvm.vm.exceptions.MemoryDetermineException;
-import esvm.vm.exceptions.MemoryNullBlockException;
-import esvm.vm.exceptions.MemoryOutOfRangeException;
+import esvm.vm.exceptions.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -18,11 +14,15 @@ import java.util.ArrayList;
  */
 public class MemoryManager {
     private byte[] MEMORY;
+    private byte[] STACK;
     private ArrayList<Block> blocks = new ArrayList<Block>();
 
     private int bs;
-    private int blockcount;
+    private int pageCount;
     private int memorysize;
+    private int stacksizeinbyte;
+    private int stacksizeinint;
+    private int stackpointer = 0; //Указатель на вершину стека
 
     public MemoryManager() {
 
@@ -35,16 +35,23 @@ public class MemoryManager {
      * @param count количество блоков
      * @throws MemoryDetermineException не придумал пока причину вызова
      */
-    public void determineMemory(int bs, int count) throws MemoryDetermineException{
+    public void determineMemory(int bs, int count, int stacksize) throws MemoryDetermineException{
         this.bs = bs;
-        blockcount = count;
+        pageCount = count;
         memorysize = count * bs;
+        stacksizeinbyte = stacksize;
+        //if (stacksize % 4 != 0) {
+        //    throw new MemoryDetermineException("Stack size is not a multiple of 4");
+        //}
+        stacksizeinint = stacksize / 4;
         MEMORY = new byte[memorysize]; //Созадли пустой массив байт
         for (int i = 0; i < memorysize; i++) { //Заполняем его нулями
             MEMORY[i] = 0;
         }
-        int a;
-        a = 1 + 1;
+        STACK = new byte[stacksizeinbyte];
+        for (int i = 0; i < stacksizeinbyte; i++) {
+            STACK[i] = 0;
+        }
     }
 
     /**
@@ -55,28 +62,52 @@ public class MemoryManager {
      * @return указатель на созданную область памяти
      */
     public Pointer allocate(int size) throws MemoryAllocateException {
+        boolean free;
+        for (int i = 0; i < MEMORY.length; i++) { //Проходим по всей памяти
+            free = true;
+            if (MEMORY[i] == 0) { //до первого нулевого байта
+                int blsa;
+                int blss;
+                for (int j = 0; j < blocks.size(); j++) { //и проверяем, не чей-то ли это байт
+                    blsa = blocks.get(j).start.page * bs + blocks.get(j).start.offset;
+                    blss = blsa + blocks.get(j).size;
+                    if (i >= blsa && i < blss) {
+                        free = false;
+                        break; //если этот байт уже занят, выходим из цикла
+                    }
+                }
+                if (free) { //если байт ничейный, аллоцируем новый блок
+                    Pointer pointer = new Pointer(Math.round(i / bs), i - (Math.round(i / bs) * bs));
+                    blocks.add(new Block(pointer, size));
+                    return pointer;
+                }
+            }
+        }
 
-        return  new Pointer(0,0);
+        throw new MemoryAllocateException("For allocating insufficient memory");
     }
 
     /**
-     * Производит абсолютное выделение памяти с затиранием занятых областей
+     * Производит абсолютное выделение памяти не производя проверку на
+     * занятость
      *
-     * @param address адрес начала записи
+     * @param pointer адрес начала записи
      * @param size размер
      * @return указатель на созданную область памяти
      * @throws MemoryOutOfRangeException в сулчае если выделяемый блок памяти
      *      выходит за гранизы адрессного пространства
      */
-    public Pointer callocate(Address address, int size) throws MemoryOutOfRangeException{
+    public Pointer callocate(Pointer pointer, int size) throws MemoryOutOfRangeException{
+        blocks.add(new Block(pointer, size));
 
-        return new Pointer(0, 0);
+        return pointer;
     }
 
     /**
      * Перемещает область памяти по указанному в указателе адресу
      *
-     * @param pointer указатель на новый адрес в памяти
+     * @param blockpointer указатель на перемещаемый блок
+     * @param newpointer указатель на новый адрес в памяти
      * @return указатель на новый адрес
      * @throws MemoryAllocateException в случае если новое положение
      *      перекрывает существующий блок
@@ -85,9 +116,47 @@ public class MemoryManager {
      * @throws MemoryNullBlockException в случае если по указанному в
      *      указателе адресу нет существующего блока
      */
-    public Pointer rellocate(Pointer pointer) throws MemoryAllocateException, MemoryNullBlockException, MemoryOutOfRangeException{
+    public Pointer rellocate(Pointer blockpointer, Pointer newpointer) throws MemoryAllocateException, MemoryNullBlockException, MemoryOutOfRangeException{
+        boolean exist = false;
+        int bi = 0;
 
-        return new Pointer(0, 0);
+        for (int i = 0; i < blocks.size(); i++) { //проверяем существует блок к которому хотим обратиться
+            if (blocks.get(i).start.page == blockpointer.page && blocks.get(i).start.offset == blockpointer.offset) {
+                bi = i;
+                exist = true;
+                break;
+            }
+        }
+        if (!exist) {
+            throw new MemoryNullBlockException("There is no block with address " + blockpointer.page + ":" + blockpointer.offset);
+        }
+        int oldad = blocks.get(bi).start.page * bs + blocks.get(bi).start.offset;
+        int newad = newpointer.page * bs + newpointer.offset;
+
+        if (newad + blocks.get(bi).size > MEMORY.length) { //Проверяем не выходит ли блок на новом адресе за пределы памяти
+            throw new MemoryNullBlockException("New block address " + newpointer.page + ":" + newpointer.offset + " beyond the limit of the address space");
+        }
+        int conba;
+        for (int i = 0; i < blocks.size(); i++) { //проверяем не перетрет ли блок другие блоки
+            for (int j = 0; j < blocks.get(i).size; j++) {
+                conba = blocks.get(i).start.page * bs + blocks.get(i).start.offset + j;
+                for (int m = 0; m < blocks.get(bi).size; m++) {
+                    if (conba == newad + m) {
+                        throw new MemoryAllocateException("New block address " + newpointer.page + ":" + newpointer.offset + " covers the block at " +
+                                blocks.get(i).start.page + ":" + blocks.get(i).start.offset);
+                    }
+                }
+            }
+
+        }
+
+        for (int i = 0; i < blocks.get(bi).size; i++) {
+            MEMORY[newad + i] = MEMORY[oldad + i];
+            MEMORY[oldad + i] = 0;
+        }
+        blocks.get(bi).start = newpointer;
+
+        return newpointer;
     }
 
     /**
@@ -98,7 +167,24 @@ public class MemoryManager {
      *      указателе адресу нет существующего блока
      */
     public void free(Pointer pointer) throws MemoryNullBlockException {
+        boolean exist = false;
+        int bi = 0;
 
+        for (int i = 0; i < blocks.size(); i++) { //проверяем существует блок к которому хотим обратиться
+            if (blocks.get(i).start.page == pointer.page && blocks.get(i).start.offset == pointer.offset) {
+                bi = i;
+                exist = true;
+                break;
+            }
+        }
+        if (!exist) {
+            throw new MemoryNullBlockException("There is no block with address " + pointer.page + ":" + pointer.offset);
+        }
+        int ma = blocks.get(bi).start.page * bs + blocks.get(bi).start.offset;
+        for (int i = 0; i < blocks.get(bi).size; i++) { //Пишем блок
+            MEMORY[ma + i] = 0;
+        }
+        blocks.remove(bi);
     }
 
     /**
@@ -111,8 +197,19 @@ public class MemoryManager {
      *      памяти выходит за граница адрессного пространста
      */
     public byte[] read(Pointer pointer, int size) throws MemoryOutOfRangeException{
+        int lastba = (pointer.page * bs) + (pointer.offset + size);
+        if (lastba > MEMORY.length) {
+            Pointer req = new Pointer(Math.round(lastba / bs) + 1, lastba - (Math.round(lastba / bs) * bs));
+            throw new MemoryOutOfRangeException("Attempt to address at overseas address space. " +
+                    "The requested address is " + String.valueOf(req.page + ":" + req.offset) +" , the maximum possible address of " + String.valueOf(pageCount + ":" + bs));
+        }
+        byte[] bytes = new byte[size];
+        int sta = pointer.page * bs + pointer.offset;
+        for (int i = 0; i < size; i++) {
+            bytes[i] = MEMORY[sta + i];
+        }
 
-        return new byte[2];
+        return bytes;
     }
 
     /**
@@ -125,12 +222,15 @@ public class MemoryManager {
      *      памяти выходит за граница адрессного пространста
      */
     public void write(Pointer pointer, byte[] bytes) throws MemoryOutOfRangeException {
-        if (pointer.page * pointer.offset > bytes.length - 1) {
+        int lastba = (pointer.page * bs) + (pointer.offset + bytes.length);
+        if (lastba > MEMORY.length) {
+            Pointer req = new Pointer(Math.round(lastba / bs) + 1, lastba - (Math.round(lastba / bs) * bs));
             throw new MemoryOutOfRangeException("Attempt to address at overseas address space. " +
-                    "The requested address is " + String.valueOf(blockcount + ":" + bs) +" , the maximum possible address of " + String.valueOf(pointer.page + ":" + pointer.offset));
+                    "The requested address is " + String.valueOf(req.page + ":" + req.offset) +" , the maximum possible address of " + String.valueOf(pageCount + ":" + bs));
         }
+        int sta = (pointer.page * bs) + pointer.offset;
         for (int i = 0; i < bytes.length; i++) {
-            MEMORY [(pointer.page * pointer.offset) + i] = bytes[i];
+            MEMORY [sta + i] = bytes[i];
         }
     }
 
@@ -143,9 +243,26 @@ public class MemoryManager {
      *      указателе адресу нет существующего блока
      */
     public byte[] readBlock(Pointer pointer) throws MemoryNullBlockException{
+        boolean exist = false;
+        int bi = 0;
 
+        for (int i = 0; i < blocks.size(); i++) { //проверяем существует блок к которому хотим обратиться
+            if (blocks.get(i).start.page == pointer.page && blocks.get(i).start.offset == pointer.offset) {
+                bi = i;
+                exist = true;
+                break;
+            }
+        }
+        if (!exist) {
+            throw new MemoryNullBlockException("There is no block with address " + pointer.page + ":" + pointer.offset);
+        }
+        int ma = blocks.get(bi).start.page * bs + blocks.get(bi).start.offset;
+        byte[] bytes = new byte[blocks.get(bi).size];
+        for (int i = 0; i < blocks.get(bi).size; i++) { //Пишем блок
+            bytes[i] = MEMORY[ma + i];
+        }
 
-        return new byte[2];
+        return bytes;
     }
 
     /**
@@ -159,6 +276,98 @@ public class MemoryManager {
      *      размеры блока
      */
     public void writeBlock(Pointer pointer, byte[] bytes) throws MemoryNullBlockException, MemoryOutOfRangeException {
+        boolean exist = false;
+        int bi = 0;
+
+        for (int i = 0; i < blocks.size(); i++) { //проверяем существует блок к которому хотим обратиться
+            if (blocks.get(i).start.page == pointer.page && blocks.get(i).start.offset == pointer.offset) {
+                bi = i;
+                exist = true;
+                break;
+            }
+        }
+        if (!exist) {
+            throw new MemoryNullBlockException("There is no block with address " + pointer.page + ":" + pointer.offset);
+        }
+        if (blocks.get(bi).size != bytes.length) { //Проверяем на размерность блока размерности данных
+            throw new MemoryOutOfRangeException("Block at adress " + pointer.page + ":" + pointer.offset + "size is not equal to the data size");
+        }
+        int ma = blocks.get(bi).start.page * bs + blocks.get(bi).start.offset;
+        for (int i = 0; i < bytes.length; i++) { //Пишем блок
+            MEMORY[ma + i] = bytes[i];
+        }
+    }
+
+    /**
+     * Помещает значение в стек
+     *
+     * @param integer значение
+     * @throws StackOverflowException в случае преполнения стека
+     */
+    public void push(int integer) throws StackOverflowException{
+        if (stackpointer != stacksizeinint - 4) {
+            byte[] byteArray = new byte[4];
+            int shift = 0;
+            for (int i = 0; i < byteArray.length;
+                 i++) {
+
+                //if (order == ByteOrder.BIG_ENDIAN)
+                    shift = (byteArray.length - 1 - i) * 8; // 24, 16, 8, 0
+                //else
+                    shift = i * 8; // 0,8,16,24
+
+                byteArray[i] = (byte) (integer >>> shift);
+            }
+            byte[] bytes = byteArray;
+
+            for (int i = 0; i < bytes.length; i++) {
+                STACK[stackpointer + i] = bytes[i];
+            }
+            stackpointer += 4;
+        }
+    }
+
+    /**
+     * Извлекает последнее значение из стека
+     *
+     * @return значение
+     * @throws NullReferenceException в случае если стек пуст
+     */
+    public int pop() throws NullReferenceException{
+
+        return 0;
+    }
+
+    /**
+     * Возвращает объем свободной памяти
+     *
+     * @return число байт
+     */
+    public int getFreeMemorySize() {
+        int counter = 0;
+
+        for (int i = 0; i < blocks.size(); i++) {
+            counter = counter + blocks.get(i).size;
+        }
+
+        return memorysize - counter;
+    }
+
+    /**
+     * Возвращает общий объем памяти
+     *
+     * @return число байт
+     */
+    public int getMemorySize() {
+
+        return memorysize;
+    }
+
+    /**
+     * Проводит процедуру дефрагментации памяти
+     *
+     */
+    public void defrag() {
 
     }
 
@@ -173,12 +382,12 @@ public class MemoryManager {
      *      блоков физически превышает размер блоков памяти
      */
     public File dump(int startpage, int count) throws MemoryOutOfRangeException {
-        if (startpage + count > blockcount) { //Проверям на то, что мы не вылезем за пределы адрессного пространства
+        if (startpage + count > pageCount) { //Проверям на то, что мы не вылезем за пределы адрессного пространства
             throw new MemoryOutOfRangeException("The requested dump is beyond the limit of the address space. " +
-            "The ultimate requested page " + String.valueOf(startpage + count) +" , but the memory is only " + String.valueOf(blockcount));
+            "The ultimate requested page " + String.valueOf(startpage + count) +" , but the memory is only " + String.valueOf(pageCount));
         }
         byte[] signbs = ByteBuffer.allocate(4).putInt(bs).array();
-        byte[] signcount = ByteBuffer.allocate(4).putInt(blockcount).array();
+        byte[] signcount = ByteBuffer.allocate(4).putInt(pageCount).array();
         File file = new File("/home/serbis/Projects/JAVA/ESVM/memory.dump");
         FileOutputStream fos = null;
         try {

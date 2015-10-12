@@ -6,7 +6,7 @@ package esvm.vm.exceptions;
  *
  */
 public class MemoryDetermineException extends Exception {
-    public MemoryDetermineException() {
-        super("Memory determination error");
+    public MemoryDetermineException(String text) {
+        super(text);
     }
 }
