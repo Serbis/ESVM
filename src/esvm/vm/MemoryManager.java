@@ -1,3 +1,4 @@
+
 package esvm.vm;
 
 import esvm.vm.desc.Block;
@@ -22,7 +23,7 @@ public class MemoryManager {
     private int memorysize;
     private int stacksizeinbyte;
     private int stacksizeinint;
-    private int stackpointer = 0; //Указатель на вершину стека
+    private int stackpointer = -4; //Указатель на вершину стека
 
     public MemoryManager() {
 
@@ -306,24 +307,16 @@ public class MemoryManager {
      */
     public void push(int integer) throws StackOverflowException{
         if (stackpointer != stacksizeinint - 4) {
-            byte[] byteArray = new byte[4];
-            int shift = 0;
-            for (int i = 0; i < byteArray.length;
-                 i++) {
+            byte[] byteArray;
 
-                //if (order == ByteOrder.BIG_ENDIAN)
-                    shift = (byteArray.length - 1 - i) * 8; // 24, 16, 8, 0
-                //else
-                    shift = i * 8; // 0,8,16,24
-
-                byteArray[i] = (byte) (integer >>> shift);
-            }
-            byte[] bytes = byteArray;
-
-            for (int i = 0; i < bytes.length; i++) {
-                STACK[stackpointer + i] = bytes[i];
-            }
             stackpointer += 4;
+            byteArray = ByteBuffer.allocate(4).putInt(integer).array();
+            for (int i = 0; i < byteArray.length; i++) {
+                STACK[stackpointer + i] = byteArray[i];
+            }
+
+        } else {
+            throw new StackOverflowException("Stack overflow, the maximum stack size " + String.valueOf(stacksizeinbyte));
         }
     }
 
@@ -334,8 +327,17 @@ public class MemoryManager {
      * @throws NullReferenceException в случае если стек пуст
      */
     public int pop() throws NullReferenceException{
-
-        return 0;
+        if (stackpointer >= 0) {
+            byte[] bytes = new byte[4];
+            for (int i = 0; i < bytes.length; i++) {
+                bytes[i] = STACK[stackpointer + i];
+            }
+            stackpointer -= 4;
+            ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+            return byteBuffer.getInt();
+        } else {
+            throw new NullReferenceException("Stack is empty");
+        }
     }
 
     /**
@@ -368,7 +370,36 @@ public class MemoryManager {
      *
      */
     public void defrag() {
+        ArrayList<Block> free = new ArrayList<Block>(); //Массив пустых сегментов
+        ArrayList<Block> exist = new ArrayList<Block>(); //Массив занятых сегментов
+        int ba;
+        boolean draw = true; //Флаг ничейного байта
+        boolean drawcollect = false; //Флаг процесса сборки свободного блока
+        int drawcounter = 0; //Счетчик пустых байтов
+        int drawstarter = 0; //Начала области путоты
 
+        for (int i = 0; i < MEMORY.length; i++) {
+            draw = true;
+            for (int j = 0; j < blocks.size(); i++) {
+                ba = blocks.get(j).start.page * bs + blocks.get(j).start.offset;
+                if (ba == i) {
+                    i += blocks.get(j).size - 1;
+                    draw = false;
+                    drawcollect = false;
+                    if (drawcounter > 0) {
+                        free.add(new Block(new Pointer(Math.round(drawcounter / bs), drawcounter - (Math.round(drawcounter / bs) * bs)), drawcounter));
+                    }
+                    break;
+                }
+            }
+            if (draw) {
+                if (!drawcollect) {
+                    drawcollect = true;
+                    drawstarter = i;
+                }
+                drawcounter++;
+            }
+        }
     }
 
     /**
@@ -412,8 +443,5 @@ public class MemoryManager {
 
         return file;
     }
-
-
-
 
 }

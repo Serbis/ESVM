@@ -3,14 +3,13 @@ package esvm;
 
 import esvm.controllers.FXMLADumpTab;
 import esvm.controllers.controls.LabelMeta;
+import esvm.dialogs.StandartDialogs;
 import esvm.fields.Address;
 import esvm.fields.ByteModel;
 import esvm.vm.ESVM;
 import esvm.vm.desc.Pointer;
 import esvm.vm.desc.Vmspec;
-import esvm.vm.exceptions.MemoryAllocateException;
-import esvm.vm.exceptions.MemoryNullBlockException;
-import esvm.vm.exceptions.MemoryOutOfRangeException;
+import esvm.vm.exceptions.*;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
@@ -60,12 +59,19 @@ public class App {
             esvm.getMemoryManager().callocate(new Pointer(0, 0), 4);
             esvm.getMemoryManager().writeBlock(new Pointer(1, 6), new byte[]{22, 22, 22, 22});
             esvm.getMemoryManager().rellocate(new Pointer(1, 6), new Pointer(0, 4));
+            esvm.getMemoryManager().push(6511);
+            esvm.getMemoryManager().push(49634);
+            StandartDialogs.showErrorDialog("STACK", String.valueOf(esvm.getMemoryManager().pop() + "/" + esvm.getMemoryManager().pop()));
 
         } catch (MemoryOutOfRangeException e) {
             e.printStackTrace();
         } catch (MemoryAllocateException e) {
             e.printStackTrace();
         } catch (MemoryNullBlockException e) {
+            e.printStackTrace();
+        } catch (StackOverflowException e) {
+            e.printStackTrace();
+        } catch (NullReferenceException e) {
             e.printStackTrace();
         }
         instance = this;
