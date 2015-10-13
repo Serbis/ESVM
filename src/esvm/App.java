@@ -36,7 +36,7 @@ public class App {
 
 
     public App() {
-        esvm = new ESVM(new Vmspec(128, 2, 128));
+        esvm = new ESVM(new Vmspec(128, 2, 128, "/home/serbis/Projects/JAVA/ESVM/tests/test.esvmc"));
         try {
             esvm.getMemoryManager().write(new Pointer(0, 127), new byte[] {45});
             esvm.getMemoryManager().write(new Pointer(1, 0), new byte[] {127, 127});
