@@ -9,5 +9,6 @@ public class Jne extends Instruction{
 
     public Jne(short arg1) {
         this.arg1 = arg1;
+        asm = "Jne";
     }
 }

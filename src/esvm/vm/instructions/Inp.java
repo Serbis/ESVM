@@ -11,5 +11,6 @@ public class Inp extends Instruction{
     public Inp(byte arg1, short arg2) {
         this.arg1 = arg1;
         this.arg2 = arg2;
+        asm = "Inp";
     }
 }

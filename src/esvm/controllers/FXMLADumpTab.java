@@ -82,25 +82,27 @@ public class FXMLADumpTab implements Initializable{
         App.getInstance().setOnByteSelectListener(new App.OnByteSelectListener() {
             @Override
             public void onByteSelect(App.HexTableClass hexTableClass, Address address, int value) {
-                String hexV = Integer.toHexString(value).toUpperCase();
-                if (hexV.length() == 1) {
-                    hexV = "0" + hexV;
-                }
-                ethex.setText(hexV);
-                String octalV = Integer.toOctalString(value).toUpperCase();
-                if (octalV.length() == 2) {
-                    octalV = "0" + octalV;
-                }
-                etoctal.setText(octalV);
-                String binV = Integer.toBinaryString(value).toUpperCase();
-                if (binV.length() < 8) {
-                    for (int i = 0; i < 8 - binV.length() + 1; i++) {
-                        binV = "0" + binV;
+                if (hexTableClass == App.HexTableClass.DUMP) {
+                    String hexV = Integer.toHexString(value).toUpperCase();
+                    if (hexV.length() == 1) {
+                        hexV = "0" + hexV;
                     }
+                    ethex.setText(hexV);
+                    String octalV = Integer.toOctalString(value).toUpperCase();
+                    if (octalV.length() == 2) {
+                        octalV = "0" + octalV;
+                    }
+                    etoctal.setText(octalV);
+                    String binV = Integer.toBinaryString(value).toUpperCase();
+                    if (binV.length() < 8) {
+                        for (int i = 0; i < 8 - binV.length() + 1; i++) {
+                            binV = "0" + binV;
+                        }
+                    }
+                    etbin.setText(binV);
+                    et8bit.setText(String.valueOf(value));
+                    et8bitS.setText(String.valueOf(value));
                 }
-                etbin.setText(binV);
-                et8bit.setText(String.valueOf(value));
-                et8bitS.setText(String.valueOf(value));
 
             }
         });

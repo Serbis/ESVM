@@ -7,6 +7,6 @@ public class Add extends Instruction{
     public final static byte code = 1;
 
     public Add() {
-
+        asm = "Add";
     }
 }

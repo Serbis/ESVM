@@ -24,21 +24,34 @@ public class ClassLoader {
 
     }
 
-    public int load(File file) {
+    /**
+     * Загружает класс в головоной сет инструкций. Запускает верефикацию
+     * которая на данном этапе развития системы является процедурой AOT
+     * копмиляции
+     *
+     * @param file файл класса
+     */
+    public void load(File file) {
         stream = readFile(file);
 
         if (stream != null) {
             for (int i = 0; i < stream.length; i++) {
                 try {
-                    i = i + verification(stream[i], i);
+                    i = i + verificate(stream[i], i);
                 } catch (ClassVerificationErrorException e) {
                     e.printStackTrace();
                 }
             }
         }
-        return 0;
+        Global.getInstance().iSet = instructions;
     }
 
+    /**
+     * Читает файл класса и возващает массив байт
+     *
+     * @param file файл класса
+     * @return массив байт
+     */
     private byte[] readFile(File file) {
         byte[] bytes;
 
@@ -61,13 +74,23 @@ public class ClassLoader {
         return null;
     }
 
-    private int verification(byte bt, int pos) throws ClassVerificationErrorException {
+    /**
+     * Проводит покомандную верефикацию байт-кода. Производит проверки:
+     * 1. Синтаксический ошибки в структуре кода
+     *
+     * @param bt входной байт для анализа
+     * @param pos позиция входного байта в потоке
+     * @return интертор - на сколько нужно перепрыгуть к следующему байту
+     * @throws ClassVerificationErrorException в случае если обнаружена
+     *      синтаксическая ошибка в байт-коде
+     */
+    private int verificate(byte bt, int pos) throws ClassVerificationErrorException {
         ByteBuffer arg1;
         ByteBuffer arg2;
         ByteBuffer arg3;
 
         if (setmode) {
-            if (bt != 127) {
+            if (bt != -1) {
                 setbyte.add(bt);
                 return 0;
             } else {
@@ -80,159 +103,223 @@ public class ClassLoader {
 
         switch (bt) {
             case Add.code:
-                instructions.add(new Add());
+                Add add = new Add();
+                add.offset = pos;
+                instructions.add(add);
                 return 0;
 
             case Sub.code:
-                instructions.add(new Sub());
+                Sub sub = new Sub();
+                sub.offset = pos;
+                instructions.add(sub);
                 return 0;
 
             case Push.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2], stream[pos + 3], stream[pos + 4]});
-                instructions.add(new Push(arg1.getInt()));
+                Push push = new Push(arg1.getInt());
+                push.offset = pos;
+                instructions.add(push);
                 return 4;
 
             case Pop.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                instructions.add(new Pop(arg1.getShort()));
+                Pop pop = new Pop(arg1.getShort());
+                pop.offset = pos;
+                instructions.add(pop);
                 return 2;
 
             case Cmp.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
                 arg2 = ByteBuffer.wrap(new byte[] {stream[pos + 3], stream[pos + 4]});
-                instructions.add(new Cmp(arg1.getShort(), arg2.getShort()));
+                Cmp cmp = new Cmp(arg1.getShort(), arg2.getShort());
+                cmp.offset = pos;
+                instructions.add(cmp);
                 return 4;
 
             case Inc.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                instructions.add(new Inc(arg1.getShort()));
+                Inc inc = new Inc(arg1.getShort());
+                inc.offset = pos;
+                instructions.add(inc);
                 return 2;
 
             case Dec.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                instructions.add(new Dec(arg1.getShort()));
+                Dec dec = new Dec(arg1.getShort());
+                dec.offset = pos;
+                instructions.add(dec);
                 return 2;
 
             case Mul.code:
-                instructions.add(new Mul());
+                Mul mul = new Mul();
+                mul.offset = pos;
+                instructions.add(mul);
                 return 0;
 
             case IMul.code:
-                instructions.add(new IMul());
+                IMul iMul = new IMul();
+                iMul.offset = pos;
+                instructions.add(iMul);
                 return 0;
 
             case Movis.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                instructions.add(new Movis(arg1.getShort()));
+                Movis movis = new Movis(arg1.getShort());
+                movis.offset = pos;
+                instructions.add(movis);
                 return 2;
 
             case Movos.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                instructions.add(new Movos(arg1.getShort()));
+                Movos movos = new Movos(arg1.getShort());
+                movos.offset = pos;
+                instructions.add(movos);
+
                 return 2;
 
             case Xchg.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
                 arg2 = ByteBuffer.wrap(new byte[] {stream[pos + 3], stream[pos + 4]});
-                instructions.add(new Xchg(arg1.getShort(), arg2.getShort()));
+                Xchg xchg = new Xchg(arg1.getShort(), arg2.getShort());
+                xchg.offset = pos;
+                instructions.add(xchg);
                 return 4;
 
             case Lea.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
                 arg2 = ByteBuffer.wrap(new byte[] {stream[pos + 3], stream[pos + 4]});
-                instructions.add(new Lea(arg1.getShort(), arg2.getShort()));
+                Lea lea = new Lea(arg1.getShort(), arg2.getShort());
+                lea.offset = pos;
+                instructions.add(lea);
                 return 4;
 
             case Int.code:
-                instructions.add(new Int(stream[pos + 1], stream[pos + 2]));
+                Int iint = new Int(stream[pos + 1], stream[pos + 2]);
+                iint.offset = pos;
+                instructions.add(iint);
                 return 2;
 
             case Loop.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                instructions.add(new Loop(arg1.getShort()));
+                Loop loop = new Loop(arg1.getShort());
+                loop.offset = pos;
+                instructions.add(loop);
                 return 2;
 
             case Jmp.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                instructions.add(new Jmp(arg1.getShort()));
+                Jmp jmp = new Jmp(arg1.getShort());
+                jmp.offset = pos;
+                instructions.add(jmp);
                 return 2;
 
             case Div.code:
-                instructions.add(new Div());
+                Div div = new Div();
+                div.offset = pos;
+                instructions.add(div);
                 return 0;
 
             case IDiv.code:
-                instructions.add(new IDiv());
+                IDiv iDiv = new IDiv();
+                iDiv.offset = pos;
+                instructions.add(iDiv);
                 return 0;
 
             case Je.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                instructions.add(new Je(arg1.getShort()));
+                Je je = new Je(arg1.getShort());
+                je.offset = pos;
+                instructions.add(je);
                 return 2;
 
             case Jz.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                instructions.add(new Jz(arg1.getShort()));
+                Jz jz = new Jz(arg1.getShort());
+                jz.offset = pos;
+                instructions.add(jz);
                 return 2;
 
             case Jg.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                instructions.add(new Jg(arg1.getShort()));
+                Jg jg = new Jg(arg1.getShort());
+                jg.offset = pos;
+                instructions.add(jg);
                 return 2;
 
             case Jge.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                instructions.add(new Jge(arg1.getShort()));
+                Jge jge = new Jge(arg1.getShort());
+                jge.offset = pos;
+                instructions.add(jge);
                 return 2;
 
             case Jl.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                instructions.add(new Jl(arg1.getShort()));
+                Jl jl = new Jl(arg1.getShort());
+                jl.offset = pos;
+                instructions.add(jl);
                 return 2;
 
             case Jle.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                instructions.add(new Jle(arg1.getShort()));
+                Jle jle = new Jle(arg1.getShort());
+                jle.offset = pos;
+                instructions.add(jle);
                 return 2;
 
             case Jne.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                instructions.add(new Jne(arg1.getShort()));
+                Jne jne = new Jne(arg1.getShort());
+                jne.offset = pos;
+                instructions.add(jne);
                 return 2;
 
             case Jnge.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                instructions.add(new Jnge(arg1.getShort()));
+                Jnge jnge = new Jnge(arg1.getShort());
+                jnge.offset = pos;
+                instructions.add(jnge);
                 return 2;
 
             case Jnl.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                instructions.add(new Jnl(arg1.getShort()));
+                Jnl jnl = new Jnl(arg1.getShort());
+                jnl.offset = pos;
+                instructions.add(jnl);
                 return 2;
 
             case Jnle.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                instructions.add(new Jnle(arg1.getShort()));
+                Jnle jnle = new Jnle(arg1.getShort());
+                jnle.offset = pos;
+                instructions.add(jnle);
                 return 2;
 
             case Out.code:
                 arg2 = ByteBuffer.wrap(new byte[] {stream[pos + 2], stream[pos + 3]});
-                instructions.add(new Out(stream[pos + 1], arg2.getShort()));
+                Out out = new Out(stream[pos + 1], arg2.getShort());
+                out.offset = pos;
+                instructions.add(out);
                 return 3;
 
             case Inp.code:
                 arg2 = ByteBuffer.wrap(new byte[] {stream[pos + 2], stream[pos + 3]});
-                instructions.add(new Inp(stream[pos + 1], arg2.getShort()));
+                Inp inp = new Inp(stream[pos + 1], arg2.getShort());
+                inp.offset = pos;
+                instructions.add(inp);
                 return 3;
 
             case Db.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
                 arg2 = ByteBuffer.wrap(new byte[] {stream[pos + 3], stream[pos + 4]});
-                instructions.add(new Db(arg1.getShort(), arg2.getShort()));
+                Db db = new Db(arg1.getShort(), arg2.getShort());
+                db.offset = pos;
+                instructions.add(db);
                 return 4;
 
             case Set.code:
                 set = new Set();
+                set.offset = pos;
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
                 set.arg1 = arg1.getShort();
                 setmode = true;
@@ -240,13 +327,14 @@ public class ClassLoader {
 
             case Pushv.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                instructions.add(new Pushv(arg1.getShort()));
+                Pushv pushv = new Pushv(arg1.getShort());
+                pushv.offset = pos;
+                instructions.add(pushv);
                 return 2;
 
             default:
                 throw new ClassVerificationErrorException("Verification error bytecode at offset " + String.valueOf(pos));
 
         }
-
     }
 }

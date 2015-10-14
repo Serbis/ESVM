@@ -9,5 +9,6 @@ public class Pushv extends Instruction{
 
     public Pushv(short arg1) {
         this.arg1 = arg1;
+        asm = "Pushv";
     }
 }

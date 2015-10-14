@@ -11,5 +11,6 @@ public class Xchg extends Instruction{
     public Xchg(short arg1, short arg2) {
         this.arg1 = arg1;
         this.arg2 = arg2;
+        asm = "Xchg";
     }
 }

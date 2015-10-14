@@ -11,6 +11,7 @@ import java.io.File;
 public class ESVM {
     private MemoryManager memoryManager;
     private ClassLoader classLoader;
+    private Disassembler disassembler;
 
     /**
      * Создазает виртальные объекты на соновании полученной на вход
@@ -19,6 +20,7 @@ public class ESVM {
      * @param vmspec спецификация виртуальной машины
      */
     public ESVM(Vmspec vmspec) {
+        new Global();
         memoryManager = new MemoryManager();
         classLoader = new ClassLoader();
         try {
@@ -46,4 +48,17 @@ public class ESVM {
      * @return экземпляр загрузчика классов
      */
     public ClassLoader getClassLoader() { return classLoader; }
+
+    /**
+     * Возвращает дисзассемблер
+     *
+     * @return экземпляр дизассемблера
+     */
+    public Disassembler getDisassembler() {
+        if (disassembler == null) {
+            disassembler = new Disassembler();
+        }
+
+        return disassembler;
+    }
 }

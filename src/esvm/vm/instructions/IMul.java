@@ -5,7 +5,8 @@ package esvm.vm.instructions;
  */
 public class IMul extends Instruction{
     public final static byte code = 9;
-    public IMul() {
 
+    public IMul() {
+        asm = "IMul";
     }
 }

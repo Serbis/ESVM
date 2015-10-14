@@ -9,5 +9,6 @@ public class Jg extends Instruction{
 
     public Jg(short arg1) {
         this.arg1 = arg1;
+        asm = "Jg";
     }
 }

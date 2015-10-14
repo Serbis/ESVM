@@ -9,5 +9,6 @@ public class Push extends Instruction{
 
     public Push(int arg1) {
         this.arg1 = arg1;
+        asm = "Push";
     }
 }

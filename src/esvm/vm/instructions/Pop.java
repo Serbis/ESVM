@@ -9,5 +9,6 @@ public class Pop extends Instruction{
 
     public Pop(short arg1) {
         this.arg1 = arg1;
+        asm = "Pop";
     }
 }

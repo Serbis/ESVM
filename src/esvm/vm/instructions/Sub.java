@@ -7,6 +7,6 @@ public class Sub extends Instruction{
     public final static byte code = 2;
 
     public Sub() {
-
+        asm = "Sub";
     }
 }

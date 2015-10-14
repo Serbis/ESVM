@@ -11,5 +11,6 @@ public class Int extends Instruction{
     public Int(byte arg1, byte arg2) {
         this.arg1 = arg1;
         this.arg2 = arg2;
+        asm = "Int";
     }
 }

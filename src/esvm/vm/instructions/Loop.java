@@ -9,5 +9,6 @@ public class Loop extends Instruction{
 
     public Loop(short arg1) {
         this.arg1 = arg1;
+        asm = "Loop";
     }
 }

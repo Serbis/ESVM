@@ -11,6 +11,6 @@ public class Set extends Instruction{
     public final static byte code = 32;
 
     public Set() {
-
+        asm = "Set";
     }
 }

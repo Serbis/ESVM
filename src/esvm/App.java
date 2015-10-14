@@ -3,13 +3,10 @@ package esvm;
 
 import esvm.controllers.FXMLADumpTab;
 import esvm.controllers.controls.LabelMeta;
-import esvm.dialogs.StandartDialogs;
 import esvm.fields.Address;
 import esvm.fields.ByteModel;
 import esvm.vm.ESVM;
-import esvm.vm.desc.Pointer;
-import esvm.vm.desc.Vmspec;
-import esvm.vm.exceptions.*;
+import esvm.vm.exceptions.MemoryOutOfRangeException;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
@@ -27,8 +24,12 @@ public class App {
     public interface OnByteSelectListener { //Интерфес вызывает при выборе какого либо байта в hex таблицах
         public void onByteSelect(HexTableClass hexTableClass, Address address, int value);
     }
+    public interface OnAsmSelectListener { //Интерфес вызывает при выборе какого либо байта в hex таблицах
+        public void onAsmSelect(HexTableClass hexTableClass, int offset);
+    }
 
-    OnByteSelectListener onByteSelectListener;
+    public OnByteSelectListener onByteSelectListener;
+    public OnAsmSelectListener onAsmSelectListener;
 
     public static App instance;
     public ESVM esvm;
@@ -36,10 +37,11 @@ public class App {
 
 
     public App() {
-        esvm = new ESVM(new Vmspec(128, 2, 128, "/home/serbis/Projects/JAVA/ESVM/tests/test.esvmc"));
-        try {
-            esvm.getMemoryManager().write(new Pointer(0, 127), new byte[] {45});
-            esvm.getMemoryManager().write(new Pointer(1, 0), new byte[] {127, 127});
+        //esvm = new ESVM(new Vmspec(128, 2, 128, "/home/serbis/Projects/JAVA/ESVM/tests/test.esvmc"));
+        //try {
+            //esvm.getMemoryManager().write(new Pointer(0, 127), new byte[] {45});
+            //esvm.getMemoryManager().write(new Pointer(1, 0), new byte[] {127, 127});
+
             //byte[] bytes = esvm.getMemoryManager().read(new Pointer(1, 127), 3);
             //String[] hexes = new String[bytes.length];
             //for (int i = 0; i < bytes.length; i++) {
@@ -55,25 +57,26 @@ public class App {
             //esvm.getMemoryManager().writeBlock(new Pointer(1, 2), new byte[]{34, 34, 34, 34});
            // esvm.getMemoryManager().writeBlock(new Pointer(1, 6), new byte[]{22, 22, 22, 22});
             //esvm.getMemoryManager().writeBlock(new Pointer(1, 10), new byte[]{43, 43, 43, 43});
-            esvm.getMemoryManager().callocate(new Pointer(1, 6), 4);
-            esvm.getMemoryManager().callocate(new Pointer(0, 0), 4);
-            esvm.getMemoryManager().writeBlock(new Pointer(1, 6), new byte[]{22, 22, 22, 22});
-            esvm.getMemoryManager().rellocate(new Pointer(1, 6), new Pointer(0, 4));
-            esvm.getMemoryManager().push(6511);
-            esvm.getMemoryManager().push(49634);
-            StandartDialogs.showErrorDialog("STACK", String.valueOf(esvm.getMemoryManager().pop() + "/" + esvm.getMemoryManager().pop()));
+            //esvm.getMemoryManager().callocate(new Pointer(1, 6), 4);
+           // esvm.getMemoryManager().callocate(new Pointer(0, 0), 4);
+            //esvm.getMemoryManager().writeBlock(new Pointer(1, 6), new byte[]{22, 22, 22, 22});
+           // esvm.getMemoryManager().rellocate(new Pointer(1, 6), new Pointer(0, 4));
+           // esvm.getMemoryManager().push(6511);
+           // esvm.getMemoryManager().push(49634);
 
-        } catch (MemoryOutOfRangeException e) {
-            e.printStackTrace();
-        } catch (MemoryAllocateException e) {
-            e.printStackTrace();
-        } catch (MemoryNullBlockException e) {
-            e.printStackTrace();
-        } catch (StackOverflowException e) {
-            e.printStackTrace();
-        } catch (NullReferenceException e) {
-            e.printStackTrace();
-        }
+            //AsmLine[] asmLines = esvm.getDisassembler().getAsm();
+            int a = 0;
+            a = 1 + 1;
+
+        //} catch (MemoryOutOfRangeException e) {
+        // //   e.printStackTrace();
+        //} catch (MemoryAllocateException e) {
+       //     e.printStackTrace();
+       // } catch (MemoryNullBlockException e) {
+       //     e.printStackTrace();
+       // } catch (StackOverflowException e) {
+         //   e.printStackTrace();
+        //}
         instance = this;
     }
 
@@ -85,7 +88,7 @@ public class App {
         mode = workMode;
     }
 
-    public VBox constructHexLayout(File file, int bs, int bytesPerString) {
+    public VBox constructHexLayout(File file, int bs, int bytesPerString, HexTableClass hexTableClass) {
         int rowCounter = 0;
         int colCounter = 1;
         boolean newline = true;
@@ -101,15 +104,27 @@ public class App {
         //int blockCount = (int) new BigDecimal(bc).setScale(0, RoundingMode.UP).doubleValue();
         int blockCount = (int) bc;
 
+        if (blockCount == 0) {
+            blockCount = 1;
+        }
+
         ArrayList<ArrayList<String>> hexList = new ArrayList<ArrayList<String>>();
         ArrayList<ArrayList<Byte>> byteArray = new ArrayList<ArrayList<Byte>>();
 
         for (int i = 0; i < blockCount; i++) {
             ArrayList<Byte> bytes;
             if (i == 0) {
-                bytes = readBlockFromFile(file, bs, i * bs, true);
+                if (hexTableClass == HexTableClass.DUMP) {
+                    bytes = readBlockFromFile(file, bs, i * bs, 8, true);
+                } else {
+                    bytes = readBlockFromFile(file, bs, i * bs, 0, false);
+                }
             } else {
-                bytes = readBlockFromFile(file, bs, i * bs, false);
+                if (hexTableClass == HexTableClass.DUMP) {
+                    bytes = readBlockFromFile(file, bs, i * bs, 8, false);
+                } else {
+                    bytes = readBlockFromFile(file, bs, i * bs, 0, false);
+                }
             }
             byteArray.add(bytes);
         }
@@ -160,7 +175,7 @@ public class App {
                             lastLabel[0].setBackground(null);
                             label.setBackground(backgroundAddr);
                             lastLabel[0] = label;
-                            onByteSelectListener.onByteSelect(HexTableClass.DUMP, new Address(label.getBlock(), label.getOffset()), Integer.parseInt(label.getText(), 16));
+                            onByteSelectListener.onByteSelect(hexTableClass, new Address(label.getBlock(), label.getOffset()), Integer.parseInt(label.getText(), 16));
                         } else {
                             label.setBackground(backgroundAddr);
                             lastLabel[0] = label;
@@ -187,13 +202,23 @@ public class App {
 
     }
 
-    public ArrayList<Byte> readBlockFromFile(File file, int bs, int offset, boolean delsign) {
+    /**
+     * Считвыет файл заданным плоком.
+     *
+     * @param file файл
+     * @param bs размер считываемого блока байт
+     * @param offset смещение от начала файла
+     * @param indent отступ в право от смещения (если у файла есть подпись)
+     * @param delsign пропуск подписи
+     * @return массив байт
+     */
+    public ArrayList<Byte> readBlockFromFile(File file, int bs, int offset, int indent, boolean delsign) {
         ArrayList<Byte> bytes = new ArrayList<Byte>();
 
         try {
             RandomAccessFile raf = new RandomAccessFile(file, "rw");
             raf.seek(offset);
-            int bss = 8;
+            int bss = indent;
             int bsslen;
             if (delsign) {
                 bsslen = bs + 8;
@@ -227,7 +252,7 @@ public class App {
             signbs = raf.readInt();
             raf.seek(4);
             signcount = raf.readInt();
-            fxmlaDumpTab.setHexGrig(constructHexLayout(file, signbs, 11));
+            fxmlaDumpTab.setHexGrig(constructHexLayout(file, signbs, 11, HexTableClass.DUMP));
             raf.close();
         } catch (MemoryOutOfRangeException e) {
             e.printStackTrace();
@@ -240,6 +265,10 @@ public class App {
 
     public void setOnByteSelectListener(OnByteSelectListener onByteSelectListener) {
         this.onByteSelectListener = onByteSelectListener;
+    }
+
+    public void setOnAsmSelectListener(OnAsmSelectListener onAsmSelectListener) {
+        this.onAsmSelectListener = onAsmSelectListener;
     }
 
     public enum WorkMode {

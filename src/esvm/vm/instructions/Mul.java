@@ -7,6 +7,6 @@ public class Mul extends Instruction{
     public final static byte code = 8;
 
     public Mul() {
-
+        asm = "Mul";
     }
 }

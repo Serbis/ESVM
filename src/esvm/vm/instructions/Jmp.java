@@ -9,5 +9,6 @@ public class Jmp extends Instruction{
 
     public Jmp(short arg1) {
         this.arg1 = arg1;
+        asm = "Jmp";
     }
 }

@@ -5,7 +5,8 @@ package esvm.vm.instructions;
  */
 public class Div extends Instruction{
     public  final static byte code = 17;
-    public Div() {
 
+    public Div() {
+        asm = "Div";
     }
 }

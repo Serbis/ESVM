@@ -7,6 +7,6 @@ public class IDiv extends Instruction{
     public final static byte code = 18;
 
     public IDiv() {
-
+        asm = "IDiv";
     }
 }

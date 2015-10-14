@@ -11,5 +11,6 @@ public class Lea extends Instruction{
     public Lea(short arg1, short arg2) {
         this.arg1 = arg1;
         this.arg2 = arg2;
+        asm = "Lea";
     }
 }

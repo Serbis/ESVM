@@ -9,5 +9,6 @@ public class Movis extends Instruction{
 
     public Movis(short arg1) {
         this.arg1 = arg1;
+        asm = "Movis";
     }
 }
