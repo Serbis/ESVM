@@ -6,12 +6,13 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox fx:id="vBox" maxHeight="NaN" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="esvm.controllers.FXMLAIOTab">
+<VBox fx:id="vBox" maxHeight="NaN" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="esvm.controllers.FXMLAIOTab">
    <children>
-      <AnchorPane fx:id="anchorPane" prefHeight="244.0" prefWidth="151.0">
+      <AnchorPane fx:id="anchorPane" prefHeight="600.0" prefWidth="1200.0">
          <children>
-            <Label layoutY="6.0" text="Label" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" />
-            <TextField layoutY="109.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+            <Label fx:id="lbIO" layoutY="6.0" prefHeight="541.0" prefWidth="1200.0" textAlignment="LEFT" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" />
+            <TextField fx:id="tfInput" layoutY="560.0" prefHeight="26.0" prefWidth="1097.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="103.0" />
+            <Button onAction="#handleslbtnEnterAction" fx:id="btnEnter" layoutX="1097.0" layoutY="560.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="93.0" text="Enter" />
          </children>
       </AnchorPane>
    </children>

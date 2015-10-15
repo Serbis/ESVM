@@ -3,12 +3,7 @@ package esvm.controllers;
 import esvm.App;
 import esvm.vm.ESVM;
 import esvm.vm.desc.AsmLine;
-import esvm.vm.desc.Pointer;
 import esvm.vm.desc.Vmspec;
-import esvm.vm.exceptions.MemoryAllocateException;
-import esvm.vm.exceptions.MemoryNullBlockException;
-import esvm.vm.exceptions.MemoryOutOfRangeException;
-import esvm.vm.exceptions.StackOverflowException;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -35,6 +30,7 @@ public class FXMLAMain implements Initializable{
 
     public FXMLADumpTab fxmlaDumpTab;
     public FXMLADDMTab fxmladdmTab;
+    public FXMLAIOTab fxmlaioTab;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -71,6 +67,7 @@ public class FXMLAMain implements Initializable{
             tabPane.getTabs().get(3).setContent(gcTab);
             fxmlaDumpTab = loaderDumpTab.getController();
             fxmladdmTab = loaderDDMTab.getController();
+            fxmlaioTab = loaderIOTab.getController();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -116,24 +113,33 @@ public class FXMLAMain implements Initializable{
         File classFile = fileChooser.showOpenDialog(null);
 
         App.getInstance().esvm = new ESVM(new Vmspec(128, 2, 128, classFile.getPath()));
-        try {
-            App.getInstance().esvm.getMemoryManager().write(new Pointer(0, 127), new byte[] {45});
-            App.getInstance().esvm.getMemoryManager().write(new Pointer(1, 0), new byte[] {127, 127});
-            App.getInstance().esvm.getMemoryManager().callocate(new Pointer(1, 6), 4);
-            App.getInstance().esvm.getMemoryManager().callocate(new Pointer(0, 0), 4);
-            App.getInstance().esvm.getMemoryManager().writeBlock(new Pointer(1, 6), new byte[]{22, 22, 22, 22});
-            App.getInstance().esvm.getMemoryManager().rellocate(new Pointer(1, 6), new Pointer(0, 4));
-            App.getInstance().esvm.getMemoryManager().push(6511);
-            App.getInstance().esvm.getMemoryManager().push(49634);
-        } catch (MemoryOutOfRangeException | MemoryAllocateException | MemoryNullBlockException | StackOverflowException e) {
-            e.printStackTrace();
-        }
+       // try {
+            //App.getInstance().esvm.getMemoryManager().write(new Pointer(0, 127), new byte[] {45});
+            //App.getInstance().esvm.getMemoryManager().write(new Pointer(1, 0), new byte[] {127, 127});
+            //App.getInstance().esvm.getMemoryManager().callocate(new Pointer(1, 6), 4);
+            //App.getInstance().esvm.getMemoryManager().callocate(new Pointer(0, 0), 4);
+            //App.getInstance().esvm.getMemoryManager().writeBlock(new Pointer(1, 6), new byte[]{22, 22, 22, 22});
+            //App.getInstance().esvm.getMemoryManager().rellocate(new Pointer(1, 6), new Pointer(0, 4));
+            //App.getInstance().esvm.getMemoryManager().push(6511);
+            //App.getInstance().esvm.getMemoryManager().push(49634);
+        //} catch (MemoryOutOfRangeException | MemoryAllocateException | MemoryNullBlockException | StackOverflowException e) {
+        //    e.printStackTrace();
+        //}
 
         AsmLine[] asmLines = App.getInstance().esvm.getDisassembler().getAsm();
         fxmladdmTab.initCodePane(asmLines);
         fxmladdmTab.initBinPane(classFile);
+        fxmlaioTab.classLoaded();
         App.getInstance().loadDupmFromVm(fxmlaDumpTab);
 
+    }
+
+    /**
+     * Запускает свознове выполнение программы
+     *
+     */
+    private void actionRun() {
+        App.getInstance().esvm.getExecutor().execute();
     }
 
     private void actionOpenExit() {
@@ -158,6 +164,10 @@ public class FXMLAMain implements Initializable{
 
     @FXML protected void handlesltbbtnOpenDumpAction(ActionEvent event) {
         actionOpenDump();
+    }
+
+    @FXML protected void handlesltbbtnRunAction(ActionEvent event) {
+        actionRun();
     }
 
 

@@ -179,12 +179,25 @@ public class Disassembler {
 
                 case "Set":
                     Set set = (Set)  lociset.get(i);
-                    asmLine.com += "(" + String.valueOf(set.arg1) + ", " + set.arg2 + ");";
+                    String data = "";
+                    for (int o = 0; o < set.arg3.length; o++) {
+                        String hex = Integer.toHexString(set.arg3[o]).toUpperCase();
+                        if (hex.length() == 1) {
+                            hex = "0" + hex;
+                        }
+                        data += hex + " ";
+                    }
+                    asmLine.com += "(" + String.valueOf(set.arg1) + ", " + set.arg2 + ", " + data + ");";
                     break;
 
                 case "Pushv":
                     Pushv pushv = (Pushv) lociset.get(i);
                     asmLine.com += "(" + String.valueOf(pushv.arg1) + ");";
+                    break;
+
+                case "Outv":
+                    Outv outv = (Outv)  lociset.get(i);
+                    asmLine.com += "(" + String.valueOf(outv.arg1) + ", " + outv.arg2 + ");";
                     break;
 
             }

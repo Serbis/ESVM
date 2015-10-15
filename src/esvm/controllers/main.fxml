@@ -23,6 +23,8 @@
         <items>
           <Button fx:id="tbbtnOpenClass" mnemonicParsing="false"  prefHeight="20" prefWidth="20" onAction="#handlesltbbtnOpenClassAction"/>
           <Button fx:id="tbbtnOpenDump" mnemonicParsing="false"  prefHeight="20" prefWidth="20" onAction="#handlesltbbtnOpenDumpAction"/>
+          <Button fx:id="tbbtnRun" mnemonicParsing="false"  prefHeight="20" prefWidth="20" onAction="#handlesltbbtnRunAction"/>
+
         </items>
       </ToolBar>
       <TabPane  tabClosingPolicy="UNAVAILABLE" fx:id="tabPane">

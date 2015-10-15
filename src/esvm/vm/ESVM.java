@@ -12,6 +12,8 @@ public class ESVM {
     private MemoryManager memoryManager;
     private ClassLoader classLoader;
     private Disassembler disassembler;
+    private Executor executor;
+    private Global global;
 
     /**
      * Создазает виртальные объекты на соновании полученной на вход
@@ -20,9 +22,12 @@ public class ESVM {
      * @param vmspec спецификация виртуальной машины
      */
     public ESVM(Vmspec vmspec) {
-        new Global();
+        global = new Global();
         memoryManager = new MemoryManager();
         classLoader = new ClassLoader();
+        executor = new Executor();
+        Global.getInstance().memoryManager = memoryManager;
+        Global.getInstance().interruptsManager = new InterruptsManager();
         try {
             memoryManager.determineMemory(vmspec.memory_bs, vmspec.memory_blockcount, vmspec.memory_stacksize);
         } catch (MemoryDetermineException e) {
@@ -60,5 +65,32 @@ public class ESVM {
         }
 
         return disassembler;
+    }
+
+    /**
+     * Возвращает экзекутор
+     *
+     * @return экземпляр экзекутора
+     */
+    public Executor getExecutor() {
+        return executor;
+    }
+
+    /**
+     * Возращает менеджер прерываний
+     *
+     * @return экзмепляр менеджера прерываний
+     */
+    public InterruptsManager getInterruptsManager() {
+        return Global.getInstance().interruptsManager;
+    }
+
+    /**
+     * Возращает менеджер глобальных обхектов
+     *
+     * @return экземпляр менеджела глабольных обхектов
+     */
+    public Global getGlobal() {
+        return global;
     }
 }

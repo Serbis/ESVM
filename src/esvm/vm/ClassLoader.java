@@ -16,9 +16,7 @@ import java.util.ArrayList;
 public class ClassLoader {
     private byte[] stream;
     private ArrayList<Instruction> instructions = new ArrayList<Instruction>();
-    boolean setmode = false;
     private Set set;
-    ArrayList<Byte> setbyte = new ArrayList<Byte>();
 
     public ClassLoader() {
 
@@ -88,18 +86,6 @@ public class ClassLoader {
         ByteBuffer arg1;
         ByteBuffer arg2;
         ByteBuffer arg3;
-
-        if (setmode) {
-            if (bt != -1) {
-                setbyte.add(bt);
-                return 0;
-            } else {
-                set.arg2 = setbyte;
-                instructions.add(set);
-                setmode = false;
-                return 0;
-            }
-        }
 
         switch (bt) {
             case Add.code:
@@ -296,11 +282,11 @@ public class ClassLoader {
                 return 2;
 
             case Out.code:
-                arg2 = ByteBuffer.wrap(new byte[] {stream[pos + 2], stream[pos + 3]});
-                Out out = new Out(stream[pos + 1], arg2.getShort());
+                arg2 = ByteBuffer.wrap(new byte[] {stream[pos + 2], stream[pos + 3], stream[pos + 4], stream[pos + 5]});
+                Out out = new Out(stream[pos + 1], arg2.getInt());
                 out.offset = pos;
                 instructions.add(out);
-                return 3;
+                return 5;
 
             case Inp.code:
                 arg2 = ByteBuffer.wrap(new byte[] {stream[pos + 2], stream[pos + 3]});
@@ -321,16 +307,30 @@ public class ClassLoader {
                 set = new Set();
                 set.offset = pos;
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
+                arg2 = ByteBuffer.wrap(new byte[] {stream[pos + 3], stream[pos + 4], stream[pos + 5], stream[pos + 6]});
                 set.arg1 = arg1.getShort();
-                setmode = true;
-                return 1;
+                set.arg2 = arg2.getInt();
+                byte[] data = new byte[set.arg2];
+                for (int o = 0; o < data.length; o++) {
+                    data[o] = stream[pos + 7 + o];
+                }
+                set.arg3 = data;
+                instructions.add(set);
+                return 6 + data.length;
 
             case Pushv.code:
-                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
+                arg1 = ByteBuffer.wrap(new byte[]{stream[pos + 1], stream[pos + 2]});
                 Pushv pushv = new Pushv(arg1.getShort());
                 pushv.offset = pos;
                 instructions.add(pushv);
                 return 2;
+
+            case Outv.code:
+                arg2 = ByteBuffer.wrap(new byte[] {stream[pos + 2], stream[pos + 3]});
+                Outv outv = new Outv(stream[pos + 1], arg2.getShort());
+                outv.offset = pos;
+                instructions.add(outv);
+                return 3;
 
             default:
                 throw new ClassVerificationErrorException("Verification error bytecode at offset " + String.valueOf(pos));
