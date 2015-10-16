@@ -331,6 +331,7 @@ public class MemoryManager {
             byte[] bytes = new byte[4];
             for (int i = 0; i < bytes.length; i++) {
                 bytes[i] = STACK[stackpointer + i];
+                STACK[stackpointer + i] = 0;
             }
             stackpointer -= 4;
             ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
@@ -435,6 +436,48 @@ public class MemoryManager {
                     }
                     fos.write(page);
                 }
+            }
+            fos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return file;
+    }
+
+    /**
+     * Создает дапм стека от и до указанного значения. Может принимать на вход
+     * null, в таком случае будет создаен дамп всего стека сразу
+     *
+     * @param startvalue начальное значение
+     * @param count количество дампируемых значений
+     * @return ссылка на файл с дампом
+     * @throws MemoryOutOfRangeException в случае если колчество указанных
+     *      занчений физически превышает размер стека
+     */
+    public File dumpstack(int startvalue, int count) throws StackOutOfRangeException {
+        if (startvalue + count > STACK.length / 4) { //Проверям на то, что мы не вылезем за пределы адрессного пространства
+            throw new StackOutOfRangeException("The requested dump is beyond the limit of the address space. " +
+                    "The ultimate requested page " + String.valueOf(startvalue + count) +" , but the stack is only " + String.valueOf(pageCount));
+        }
+        byte[] signbs = ByteBuffer.allocate(4).putInt(bs).array();
+        byte[] signcount = ByteBuffer.allocate(4).putInt(pageCount).array();
+        File file = new File("/home/serbis/Projects/JAVA/ESVM/stack.dump");
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(file);
+            fos.write(signbs);
+            fos.write(signcount);
+            if (startvalue == -1 || count == -1) { //Елси где-то null
+                fos.write(STACK); //То просто пишем весь стек в файл
+            } else { //Если есть размеры дампы
+                //for (int i = 0; i < count; i++) { //то вычленяем из памяти нужные блоки и пишем их туда же
+                //    byte[] page = new byte[4];
+                //    for (int j = 0; j < bs; j++) {
+                //        page[j] = MEMORY[(startpage * bs) + i];
+                //    }
+                //    fos.write(page);
+                //}
             }
             fos.close();
         } catch (Exception e) {

@@ -23,7 +23,11 @@
         <items>
           <Button fx:id="tbbtnOpenClass" mnemonicParsing="false"  prefHeight="20" prefWidth="20" onAction="#handlesltbbtnOpenClassAction"/>
           <Button fx:id="tbbtnOpenDump" mnemonicParsing="false"  prefHeight="20" prefWidth="20" onAction="#handlesltbbtnOpenDumpAction"/>
-          <Button fx:id="tbbtnRun" mnemonicParsing="false"  prefHeight="20" prefWidth="20" onAction="#handlesltbbtnRunAction"/>
+          <Button fx:id="tbbtnRun" disable="true" mnemonicParsing="false"  prefHeight="20" prefWidth="20" onAction="#handlesltbbtnRunAction"/>
+          <Button fx:id="tbbtnDown" disable="true" mnemonicParsing="false"  prefHeight="20" prefWidth="20" onAction="#handlesltbbtnDownAction"/>
+          <Button fx:id="tbbtnStop" disable="true" mnemonicParsing="false"  prefHeight="20" prefWidth="20" onAction="#handlesltbbtnStopAction"/>
+          <Button fx:id="tbbtnResume" disable="true" mnemonicParsing="false"  prefHeight="20" prefWidth="20" onAction="#handlesltbbtnResumeAction"/>
+
 
         </items>
       </ToolBar>

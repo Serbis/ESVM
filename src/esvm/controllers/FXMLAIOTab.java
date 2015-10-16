@@ -103,7 +103,7 @@ public class FXMLAIOTab implements Initializable{
             }
             App.getInstance().esvm.getGlobal().putToPort(2, count);     //Размещаем в порте ввода размер записанных в стек значений!!!
             App.getInstance().esvm.getGlobal().getExecutorThread().stoped = false;
-            App.getInstance().esvm.getGlobal().getExecutorThread().thread.resume();
+            App.getInstance().esvm.getGlobal().getExecutorThread().resume();
         }
     }
 }

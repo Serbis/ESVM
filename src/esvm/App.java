@@ -1,12 +1,14 @@
 package esvm;
 
 
+import esvm.controllers.FXMLADDMTab;
 import esvm.controllers.FXMLADumpTab;
 import esvm.controllers.controls.LabelMeta;
 import esvm.fields.Address;
 import esvm.fields.ByteModel;
 import esvm.vm.ESVM;
 import esvm.vm.exceptions.MemoryOutOfRangeException;
+import esvm.vm.exceptions.StackOutOfRangeException;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
@@ -34,6 +36,7 @@ public class App {
     public static App instance;
     public ESVM esvm;
     private WorkMode mode;
+    public boolean[] breakpoints;
 
 
     public App() {
@@ -144,7 +147,7 @@ public class App {
         gridpane.setPadding(new Insets(5));
         gridpane.setHgap(10);
         gridpane.setVgap(10);
-        gridpane.getColumnConstraints().add(new ColumnConstraints(200, 200, 200));
+        gridpane.getColumnConstraints().add(new ColumnConstraints(100, 100, 100));
         for (int i = 0; i < bytesPerString; i++) {
             gridpane.getColumnConstraints().add(new ColumnConstraints(30, 30, 30));
         }
@@ -242,7 +245,12 @@ public class App {
 
     }
 
-    public void loadDupmFromVm(FXMLADumpTab fxmlaDumpTab) {
+    /**
+     * Загружает оперативный дамп памяти из вм
+     *
+     * @param fxmlaDumpTab экземпляр вкладки Dump
+     */
+    public void loadMemoryDupmFromVm(FXMLADumpTab fxmlaDumpTab) {
         int signbs;
         int signcount;
         try {
@@ -259,6 +267,28 @@ public class App {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Загружает оперативный дамп стека из вм
+     *
+     * @param fxmladdmTab экземпляр вкладки DDM
+     */
+    public void loadStackDupmFromVm(FXMLADDMTab fxmladdmTab) {
+        int signbs;
+        int signcount;
+        try {
+            File file = App.getInstance().esvm.getMemoryManager().dumpstack(-1, -1);
+            RandomAccessFile raf = new RandomAccessFile(file, "rw");
+            raf.seek(0);
+            signbs = raf.readInt();
+            raf.seek(4);
+            signcount = raf.readInt();
+            fxmladdmTab.setStackDumpPane(constructHexLayout(file, signbs, 5, HexTableClass.DUMP));
+            raf.close();
+        } catch (IOException | StackOutOfRangeException e) {
             e.printStackTrace();
         }
     }

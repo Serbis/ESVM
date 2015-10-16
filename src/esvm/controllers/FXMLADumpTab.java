@@ -114,6 +114,6 @@ public class FXMLADumpTab implements Initializable{
     }
 
     @FXML protected void handleslbtnRefreshAction(ActionEvent event) {
-        App.getInstance().loadDupmFromVm(this);
+        App.getInstance().loadMemoryDupmFromVm(this);
     }
 }

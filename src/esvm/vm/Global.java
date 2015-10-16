@@ -2,6 +2,10 @@ package esvm.vm;
 
 import esvm.vm.desc.Pointer;
 import esvm.vm.desc.Var;
+import esvm.vm.exceptions.InterruptNotFoundException;
+import esvm.vm.exceptions.MemoryAllocateException;
+import esvm.vm.exceptions.MemoryNullBlockException;
+import esvm.vm.exceptions.MemoryOutOfRangeException;
 import esvm.vm.instructions.Instruction;
 
 import java.util.ArrayList;
@@ -74,6 +78,34 @@ public class Global {
 
     public void putToPort(int portnum, int value) {
         ports[portnum] = value;
+    }
+
+    public int getInstructionsCount() {
+        return iSet.size();
+    }
+
+    /**
+     * Создает прерывание вывода исключению
+     *
+     * @param text текст исключения
+     * @return
+     */
+    public void createExceptionInturrupt(String text) {
+        byte[] textb = new byte[text.length()];
+        for (int i = 0; i < textb.length; i++) {
+            char ch = text.charAt(i);
+            textb[i] = (byte) ch;
+        }
+        try {
+            Pointer pointer = memoryManager.allocate(textb.length);
+            memoryManager.writeBlock(pointer, textb);
+            short id = getFreeVarId();
+            varMap.add(new Var(id, pointer, textb.length));
+            ports[2] = id;
+            interruptsManager.exexInterrupt((byte) 1, (byte) 2);
+        } catch (MemoryAllocateException | MemoryNullBlockException | MemoryOutOfRangeException | InterruptNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
 

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<HBox fx:id="vBoxMain" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="10.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="esvm.rows.FXMLARowMaps">
+   <children>
+      <ImageView fitHeight="10.0" fitWidth="10.0" pickOnBounds="true" preserveRatio="true" fx:id="iv"/>
+      <Label text="aaa" fx:id="lbName" />
+      <Label text="bbb" fx:id="lbDate" />
+      <Label text="ccc" fx:id="lbSize" />
+   </children>
+</HBox>

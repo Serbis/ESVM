@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
  * Created by serbis on 15.10.15.
  */
 public class ExecutorThread implements Runnable {
-    public Thread thread;
+    private Thread thread;
     public boolean stoped = false;
     private Pointer pointer;
 
@@ -25,6 +25,12 @@ public class ExecutorThread implements Runnable {
     @Override
     public void run() {
         for (int i = 0; i < Global.getInstance().iSet.size(); i++) {
+            try {
+                Global.getInstance().ports[2] = i;
+                Global.getInstance().interruptsManager.exexInterrupt((byte) 1, (byte) 0);
+            } catch (InterruptNotFoundException e) {
+                e.printStackTrace();
+            }
             switch (Global.getInstance().iSet.get(i).asm) {
                 case "Add":
 
@@ -196,5 +202,36 @@ public class ExecutorThread implements Runnable {
                     break;
             }
         }
+        try { //Вызов прерывания после исполнения всех инструкций
+            Global.getInstance().interruptsManager.exexInterrupt((byte) 1, (byte) 1);
+        } catch (InterruptNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Останавливает поток выполнения
+     *
+     */
+    public void pause() {
+        stoped = true;
+        thread.suspend();
+    }
+
+    /**
+     * Возобновляет поток выполнения
+     *
+     */
+    public void resume() {
+        stoped = false;
+        thread.resume();
+    }
+
+    /**
+     * Пркращает выполнение инстркуций
+     *
+     */
+    public void stop() {
+        thread.stop();
     }
 }

@@ -2,13 +2,18 @@ package esvm.controllers;
 
 import esvm.App;
 import esvm.vm.ESVM;
+import esvm.vm.InterruptsManager;
 import esvm.vm.desc.AsmLine;
 import esvm.vm.desc.Vmspec;
+import esvm.vm.exceptions.StackOverflowException;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.TabPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -24,6 +29,12 @@ import java.util.ResourceBundle;
  */
 public class FXMLAMain implements Initializable{
     @FXML private TabPane tabPane;
+    @FXML private Button tbbtnOpenClass;
+    @FXML private Button tbbtnOpenDump;
+    @FXML private Button tbbtnRun;
+    @FXML public Button tbbtnDown;
+    @FXML public Button tbbtnStop;
+    @FXML public Button tbbtnResume;
 
     private static FXMLAMain instance;
     private Stage stage;
@@ -44,7 +55,35 @@ public class FXMLAMain implements Initializable{
      *
      */
     private void initToolBar() {
+        ImageView iv1 = new ImageView();
+        Image image1 = new Image("file:images/class.png", 16, 16, true, true);
+        iv1.setImage(image1);
+        tbbtnOpenClass.setGraphic(iv1);
 
+        ImageView iv2 = new ImageView();
+        Image image2 = new Image("file:images/dump.png", 16, 16, true, true);
+        iv2.setImage(image2);
+        tbbtnOpenDump.setGraphic(iv2);
+
+        ImageView iv3 = new ImageView();
+        Image image3 = new Image("file:images/run.png", 16, 16, true, true);
+        iv3.setImage(image3);
+        tbbtnRun.setGraphic(iv3);
+
+        ImageView iv4 = new ImageView();
+        Image image4 = new Image("file:images/down.png", 16, 16, true, true);
+        iv4.setImage(image4);
+        tbbtnDown.setGraphic(iv4);
+
+        ImageView iv5 = new ImageView();
+        Image image5 = new Image("file:images/stop.png", 16, 16, true, true);
+        iv5.setImage(image5);
+        tbbtnStop.setGraphic(iv5);
+
+        ImageView iv6 = new ImageView();
+        Image image6 = new Image("file:images/resume.png", 16, 16, true, true);
+        iv6.setImage(image6);
+        tbbtnResume.setGraphic(iv6);
     }
 
     private void initTabs() {
@@ -126,12 +165,25 @@ public class FXMLAMain implements Initializable{
         //    e.printStackTrace();
         //}
 
+        App.getInstance().breakpoints = new boolean[App.getInstance().esvm.getGlobal().getInstructionsCount()];
+        for (int i = 0; i < App.getInstance().esvm.getGlobal().getInstructionsCount(); i++) { //Заполняем массив брекпоинтов пустышками
+            App.getInstance().breakpoints[i] = false;
+        }
         AsmLine[] asmLines = App.getInstance().esvm.getDisassembler().getAsm();
         fxmladdmTab.initCodePane(asmLines);
         fxmladdmTab.initBinPane(classFile);
+        fxmladdmTab.initStackPane();
+        fxmladdmTab.initDebug();
         fxmlaioTab.classLoaded();
-        App.getInstance().loadDupmFromVm(fxmlaDumpTab);
-
+        App.getInstance().loadMemoryDupmFromVm(fxmlaDumpTab);
+        tbbtnRun.setDisable(false);
+        for (int i = 0; i < 33; i++) { //ЭТО ЛИПА ДЛЯ ПРОВЕРКИ ПРЕРЫВАНИЯ ИСЕЛЮЧЕНИЙ
+            try {
+                App.getInstance().esvm.getMemoryManager().push(1);
+            } catch (StackOverflowException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -140,9 +192,51 @@ public class FXMLAMain implements Initializable{
      */
     private void actionRun() {
         App.getInstance().esvm.getExecutor().execute();
+        tbbtnDown.setDisable(false);
+        tbbtnStop.setDisable(false);
+        tbbtnResume.setDisable(false);
+        tbbtnRun.setDisable(true); //Обработчик прерывания завершения работы программы
+        App.getInstance().esvm.getInterruptsManager().setInterruptInterface_1_1(new InterruptsManager.InterruptInterface_1_1() {
+            @Override
+            public void onInterrupt_interface_1_1() {
+                tbbtnDown.setDisable(true);
+                tbbtnStop.setDisable(true);
+                tbbtnResume.setDisable(true);
+                tbbtnRun.setDisable(false);
+            }
+        });
     }
 
-    private void actionOpenExit() {
+    private void actionDown() {
+        if (fxmladdmTab.currentLine != App.getInstance().breakpoints.length - 1) {
+            App.getInstance().breakpoints[fxmladdmTab.currentLine + 1] = true;
+        } else {
+            tbbtnDown.setDisable(true);
+            tbbtnStop.setDisable(true);
+            tbbtnResume.setDisable(true);
+            tbbtnRun.setDisable(false);
+        }
+        App.getInstance().esvm.getGlobal().getExecutorThread().resume();
+        fxmladdmTab.dehighlightAsmAll();
+    }
+
+    private void actionStop() {
+        App.getInstance().esvm.getGlobal().getExecutorThread().stop();
+        tbbtnDown.setDisable(true);
+        tbbtnStop.setDisable(true);
+        tbbtnResume.setDisable(true);
+        fxmladdmTab.dehighlightAsmAll();
+    }
+
+    private void actionResume() {
+        App.getInstance().esvm.getGlobal().getExecutorThread().resume();
+        tbbtnDown.setDisable(true);
+        tbbtnStop.setDisable(true);
+        tbbtnResume.setDisable(true);
+        fxmladdmTab.dehighlightAsmAll();
+    }
+
+    private void actioExit() {
         stage.close();
     }
 
@@ -155,7 +249,7 @@ public class FXMLAMain implements Initializable{
     }
 
     @FXML protected void handleslmenuExitAction(ActionEvent event) {
-        actionOpenExit();
+        actioExit();
     }
 
     @FXML protected void handlesltbbtnOpenClassAction(ActionEvent event) {
@@ -168,6 +262,18 @@ public class FXMLAMain implements Initializable{
 
     @FXML protected void handlesltbbtnRunAction(ActionEvent event) {
         actionRun();
+    }
+
+    @FXML protected void handlesltbbtnDownAction(ActionEvent event) {
+        actionDown();
+    }
+
+    @FXML protected void handlesltbbtnStopAction(ActionEvent event) {
+        actionStop();
+    }
+
+    @FXML protected void handlesltbbtnResumeAction(ActionEvent event) {
+        actionResume();
     }
 
 

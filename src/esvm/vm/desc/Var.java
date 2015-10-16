@@ -6,13 +6,13 @@ package esvm.vm.desc;
 public class Var {
     public short id;
     public Pointer pointer;
-    public short size;
+    public int size;
 
     public Var() {
 
     }
 
-    public Var(short id, Pointer pointer, short size) {
+    public Var(short id, Pointer pointer, int size) {
         this.id = id;
         this.pointer = pointer;
         this.size = size;
