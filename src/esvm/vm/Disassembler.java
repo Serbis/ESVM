@@ -96,7 +96,7 @@ public class Disassembler {
 
                 case "Loop":
                     Loop loop = (Loop) lociset.get(i);
-                    asmLine.com += "(" + String.valueOf(loop.arg1) + ");";
+                    asmLine.com += "(" + String.valueOf(loop.arg1) + ", " + String.valueOf(loop.arg2) + ");";
                     break;
 
                 case "Jmp":

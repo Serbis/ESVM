@@ -187,10 +187,11 @@ public class ClassLoader {
 
             case Loop.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                Loop loop = new Loop(arg1.getShort());
+                arg2 = ByteBuffer.wrap(new byte[] {stream[pos + 3], stream[pos + 4], stream[pos + 5], stream[pos + 6]});
+                Loop loop = new Loop(arg1.getShort(), arg2.getInt());
                 loop.offset = pos;
                 instructions.add(loop);
-                return 2;
+                return 6;
 
             case Jmp.code:
                 arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});

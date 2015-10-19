@@ -26,6 +26,7 @@ public class ESVM {
         memoryManager = new MemoryManager();
         classLoader = new ClassLoader();
         executor = new Executor();
+        Global.getInstance().vmspec = vmspec;
         Global.getInstance().memoryManager = memoryManager;
         Global.getInstance().interruptsManager = new InterruptsManager();
         try {

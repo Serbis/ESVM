@@ -3,7 +3,6 @@ package esvm.controllers;
 import esvm.App;
 import esvm.controllers.controls.ImageViewBreakpoint;
 import esvm.controllers.controls.LabelCode;
-import esvm.dialogs.StandartDialogs;
 import esvm.models.RowModelMaps;
 import esvm.models.XCell;
 import esvm.vm.InterruptsManager;
@@ -38,6 +37,7 @@ public class FXMLADDMTab implements Initializable{
     @FXML private ScrollPane binScroll;
     @FXML private ScrollPane mapsScroll;
     @FXML private ScrollPane stackdumpScroll;
+    @FXML private TextArea taExceptions;
 
     private static FXMLADDMTab instance;
     private Stage stage;
@@ -47,6 +47,7 @@ public class FXMLADDMTab implements Initializable{
     final Label[] lastBinLabel = {null};
     final Label[] lastAsmHighlitLabel = {null};
     public int currentLine = 0;
+    private String exceptionsText = "";
 
 
     @Override
@@ -205,7 +206,7 @@ public class FXMLADDMTab implements Initializable{
         App.getInstance().esvm.getInterruptsManager().setInterruptInterface_1_2(new InterruptsManager.InterruptInterface_1_2() {
             @Override
             public void onInterrupt_interface_1_2(String text) {
-                StandartDialogs.showErrorDialog("Exception", text);
+                putException(text);
             }
         });
     }
@@ -313,7 +314,7 @@ public class FXMLADDMTab implements Initializable{
     /**
      * Назначает контент для сролла дампа стека
      *
-     * @param vBox
+     * @param vBox vBox
      */
     public void setStackDumpPane(VBox vBox) {
         stackdumpScroll.setContent(vBox);
@@ -348,6 +349,12 @@ public class FXMLADDMTab implements Initializable{
      */
     public void dehighlightAsmAll() {
         lastAsmHighlitLabel[0].setBackground(null);
+    }
+
+    public void putException(String text) {
+        exceptionsText += text + String.valueOf(exceptionsText.length()) + "\n";
+
+        taExceptions.setText(exceptionsText);
     }
 
 }

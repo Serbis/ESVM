@@ -2,6 +2,7 @@ package esvm.vm;
 
 import esvm.vm.desc.Pointer;
 import esvm.vm.desc.Var;
+import esvm.vm.desc.Vmspec;
 import esvm.vm.exceptions.InterruptNotFoundException;
 import esvm.vm.exceptions.MemoryAllocateException;
 import esvm.vm.exceptions.MemoryNullBlockException;
@@ -22,6 +23,8 @@ public class Global {
     public InterruptsManager interruptsManager;
     public MemoryManager memoryManager;
     private ExecutorThread executorThread;   //Экземпляр потока исполнения
+    public Vmspec vmspec; //Экземпляр конфигурации вм
+    public BoolLogic boolOpFloag; //Флаг результат булевой операции
 
     public Global() {
         initPorts();
@@ -106,6 +109,10 @@ public class Global {
         } catch (MemoryAllocateException | MemoryNullBlockException | MemoryOutOfRangeException | InterruptNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    public enum BoolLogic {
+        EQUAL, NOT_EQUAL
     }
 
 
