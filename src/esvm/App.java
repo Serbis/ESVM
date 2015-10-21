@@ -276,7 +276,7 @@ public class App {
      *
      * @param fxmladdmTab экземпляр вкладки DDM
      */
-    public void loadStackDupmFromVm(FXMLADDMTab fxmladdmTab) {
+    /*public void loadStackDupmFromVm(FXMLADDMTab fxmladdmTab) {
         int signbs;
         int signcount;
         try {
@@ -291,7 +291,7 @@ public class App {
         } catch (IOException | StackOutOfRangeException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     public void setOnByteSelectListener(OnByteSelectListener onByteSelectListener) {
         this.onByteSelectListener = onByteSelectListener;

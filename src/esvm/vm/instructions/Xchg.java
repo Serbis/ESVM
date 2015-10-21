@@ -1,5 +1,9 @@
 package esvm.vm.instructions;
 
+import esvm.vm.Global;
+import esvm.vm.exceptions.MemoryNullBlockException;
+import esvm.vm.exceptions.MemoryOutOfRangeException;
+
 /**
  * Created by serbis on 13.10.15.
  */
@@ -12,5 +16,20 @@ public class Xchg extends Instruction{
         this.arg1 = arg1;
         this.arg2 = arg2;
         asm = "Xchg";
+    }
+
+    public void exec() throws MemoryNullBlockException, MemoryOutOfRangeException {
+        pointer = Global.getInstance().getVarPointerById(this.arg1);
+        pointer2 = Global.getInstance().getVarPointerById(this.arg2);
+        byte[] var1b = Global.getInstance().memoryManager.readBlock(pointer);
+        byte[] var2b = Global.getInstance().memoryManager.readBlock(pointer2);
+        if (var1b.length != var2b.length) {
+            //Тут исключение несовместимости типов
+        }
+        byte[] median = var1b;
+        var1b = var2b;
+        var2b = median;
+        Global.getInstance().memoryManager.writeBlock(pointer, var1b);
+        Global.getInstance().memoryManager.writeBlock(pointer, var2b);
     }
 }

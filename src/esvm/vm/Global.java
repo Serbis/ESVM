@@ -112,7 +112,7 @@ public class Global {
     }
 
     public enum BoolLogic {
-        EQUAL, NOT_EQUAL
+        INDEF, EQUAL, NOT_EQUAL, NULL, GROSS, LESS, NOT_GROSS, NOT_LESS
     }
 
 

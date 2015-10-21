@@ -179,7 +179,7 @@ public class FXMLADDMTab implements Initializable{
      *
      */
     public void initStackPane() {
-        App.getInstance().loadStackDupmFromVm(this);
+        //App.getInstance().loadStackDupmFromVm(this);
     }
 
     /**

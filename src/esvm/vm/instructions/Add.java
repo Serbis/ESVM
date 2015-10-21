@@ -9,4 +9,9 @@ public class Add extends Instruction{
     public Add() {
         asm = "Add";
     }
+
+    public void exec() {
+        // Global.getInstance().memoryManager.push(Global.getInstance().memoryManager.pop() + Global.getInstance().memoryManager.pop());
+
+    }
 }

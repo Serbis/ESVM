@@ -194,11 +194,11 @@ public class ClassLoader {
                 return 6;
 
             case Jmp.code:
-                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                Jmp jmp = new Jmp(arg1.getShort());
+                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2], stream[pos + 3], stream[pos + 4]});
+                Jmp jmp = new Jmp(arg1.getInt());
                 jmp.offset = pos;
                 instructions.add(jmp);
-                return 2;
+                return 4;
 
             case Div.code:
                 Div div = new Div();
@@ -213,74 +213,74 @@ public class ClassLoader {
                 return 0;
 
             case Je.code:
-                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                Je je = new Je(arg1.getShort());
+                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2], stream[pos + 3], stream[pos + 4]});
+                Je je = new Je(arg1.getInt());
                 je.offset = pos;
                 instructions.add(je);
-                return 2;
+                return 4;
 
             case Jz.code:
-                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                Jz jz = new Jz(arg1.getShort());
+                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2], stream[pos + 3], stream[pos + 4]});
+                Jz jz = new Jz(arg1.getInt());
                 jz.offset = pos;
                 instructions.add(jz);
-                return 2;
+                return 4;
 
             case Jg.code:
-                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                Jg jg = new Jg(arg1.getShort());
+                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2], stream[pos + 3], stream[pos + 4]});
+                Jg jg = new Jg(arg1.getInt());
                 jg.offset = pos;
                 instructions.add(jg);
-                return 2;
+                return 4;
 
             case Jge.code:
-                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                Jge jge = new Jge(arg1.getShort());
+                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2], stream[pos + 3], stream[pos + 4]});
+                Jge jge = new Jge(arg1.getInt());
                 jge.offset = pos;
                 instructions.add(jge);
-                return 2;
+                return 4;
 
             case Jl.code:
-                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                Jl jl = new Jl(arg1.getShort());
+                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2], stream[pos + 3], stream[pos + 4]});
+                Jl jl = new Jl(arg1.getInt());
                 jl.offset = pos;
                 instructions.add(jl);
-                return 2;
+                return 4;
 
             case Jle.code:
-                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                Jle jle = new Jle(arg1.getShort());
+                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2], stream[pos + 3], stream[pos + 4]});
+                Jle jle = new Jle(arg1.getInt());
                 jle.offset = pos;
                 instructions.add(jle);
-                return 2;
+                return 4;
 
             case Jne.code:
-                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                Jne jne = new Jne(arg1.getShort());
+                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2], stream[pos + 3], stream[pos + 4]});
+                Jne jne = new Jne(arg1.getInt());
                 jne.offset = pos;
                 instructions.add(jne);
-                return 2;
+                return 4;
 
             case Jnge.code:
-                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                Jnge jnge = new Jnge(arg1.getShort());
+                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2], stream[pos + 3], stream[pos + 4]});
+                Jnge jnge = new Jnge(arg1.getInt());
                 jnge.offset = pos;
                 instructions.add(jnge);
-                return 2;
+                return 4;
 
             case Jnl.code:
-                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                Jnl jnl = new Jnl(arg1.getShort());
+                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2], stream[pos + 3], stream[pos + 4]});
+                Jnl jnl = new Jnl(arg1.getInt());
                 jnl.offset = pos;
                 instructions.add(jnl);
-                return 2;
+                return 4;
 
             case Jnle.code:
-                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2]});
-                Jnle jnle = new Jnle(arg1.getShort());
+                arg1 = ByteBuffer.wrap(new byte[] {stream[pos + 1], stream[pos + 2], stream[pos + 3], stream[pos + 4]});
+                Jnle jnle = new Jnle(arg1.getInt());
                 jnle.offset = pos;
                 instructions.add(jnle);
-                return 2;
+                return 4;
 
             case Out.code:
                 arg2 = ByteBuffer.wrap(new byte[] {stream[pos + 2], stream[pos + 3], stream[pos + 4], stream[pos + 5]});

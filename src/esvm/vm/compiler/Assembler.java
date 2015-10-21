@@ -296,37 +296,37 @@ public class Assembler {
                 }
 
             case Jmp.code:
-                return toShort(arg);
+                return toInt(arg);
 
             case Je.code:
-                return toShort(arg);
+                return toInt(arg);
 
             case Jz.code:
-                return toShort(arg);
+                return toInt(arg);
 
             case Jg.code:
-                return toShort(arg);
+                return toInt(arg);
 
             case Jge.code:
-                return toShort(arg);
+                return toInt(arg);
 
             case Jl.code:
-                return toShort(arg);
+                return toInt(arg);
 
             case Jle.code:
-                return toShort(arg);
+                return toInt(arg);
 
             case Jne.code:
-                return toShort(arg);
+                return toInt(arg);
 
             case Jnge.code:
-                return toShort(arg);
+                return toInt(arg);
 
             case Jnl.code:
-                return toShort(arg);
+                return toInt(arg);
 
             case Jnle.code:
-                return toShort(arg);
+                return toInt(arg);
 
             case Out.code:
                 if (argnum == 0) {
@@ -339,7 +339,7 @@ public class Assembler {
                 if (argnum == 0) {
                     return toByte(arg);
                 } else {
-                    return toInt(arg);
+                    return toShort(arg);
                 }
 
             case Db.code:
@@ -375,7 +375,7 @@ public class Assembler {
 
     private byte[] toInt(String arg) {
         ByteBuffer byteBuffer = ByteBuffer.allocate(4);
-        byteBuffer.putInt(Short.parseShort(arg));
+        byteBuffer.putInt(Integer.parseInt(arg));
         return byteBuffer.array();
     }
 

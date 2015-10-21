@@ -1,5 +1,9 @@
 package esvm.vm.instructions;
 
+import esvm.vm.Global;
+import esvm.vm.exceptions.MemoryNullBlockException;
+import esvm.vm.exceptions.MemoryOutOfRangeException;
+
 /**
  * Created by serbis on 13.10.15.
  */
@@ -11,5 +15,10 @@ public class Set extends Instruction{
 
     public Set() {
         asm = "Set";
+    }
+
+    public void exec() throws MemoryOutOfRangeException, MemoryNullBlockException {
+        pointer = Global.getInstance().getVarPointerById(this.arg1);
+        Global.getInstance().memoryManager.writeBlock(pointer, this.arg3);
     }
 }

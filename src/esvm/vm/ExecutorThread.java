@@ -1,8 +1,8 @@
 package esvm.vm;
 
 import esvm.vm.desc.Pointer;
-import esvm.vm.desc.Var;
-import esvm.vm.exceptions.*;
+import esvm.vm.exceptions.InterruptNotFoundException;
+import esvm.vm.exceptions.MemoryDetermineException;
 import esvm.vm.instructions.*;
 
 import java.nio.ByteBuffer;
@@ -16,6 +16,7 @@ public class ExecutorThread implements Runnable {
     private Pointer pointer;
     private Pointer pointer2;
     private ByteBuffer byteBuffer;
+    private ByteBuffer byteBuffer2;
 
     public ExecutorThread() {
         thread = new Thread(this, "Executor thread");
@@ -37,98 +38,38 @@ public class ExecutorThread implements Runnable {
             try {
                 switch (Global.getInstance().iSet.get(i).asm) {
                     case "Add":
-                        Global.getInstance().memoryManager.push(Global.getInstance().memoryManager.pop() + Global.getInstance().memoryManager.pop());
+                        Add add = (Add) Global.getInstance().iSet.get(i);
+                        add.exec();
                         break;
 
                     case "Sub":
-                        Global.getInstance().memoryManager.push(Global.getInstance().memoryManager.pop() - Global.getInstance().memoryManager.pop());
+                        Sub sub = (Sub) Global.getInstance().iSet.get(i);
+                        sub.exec();
                         break;
 
                     case "Push":
                         Push push = (Push) Global.getInstance().iSet.get(i);
-                        Global.getInstance().memoryManager.push(push.arg1);
+                        push.exec();
                         break;
 
                     case "Pop":
                         Pop pop = (Pop) Global.getInstance().iSet.get(i);
-                        pointer = Global.getInstance().getVarPointerById(pop.arg1);
-                        byte[] bytes = ByteBuffer.allocate(4).putInt(Global.getInstance().memoryManager.pop()).array();
-                        Global.getInstance().memoryManager.writeBlock(pointer, bytes);
-
+                        pop.exec();
                         break;
 
                     case "Cmp":
                         Cmp cmp = (Cmp) Global.getInstance().iSet.get(i);
-                        pointer = Global.getInstance().getVarPointerById(cmp.arg1);
-                        pointer2 = Global.getInstance().getVarPointerById(cmp.arg2);
-                        byte[] var1 = Global.getInstance().memoryManager.readBlock(pointer);
-                        byte[] var2 = Global.getInstance().memoryManager.readBlock(pointer2);
-                        boolean diff = false;
-                        if (var1.length == var2.length) {
-                            Global.getInstance().boolOpFloag = Global.BoolLogic.EQUAL;
-                        } else {
-                            Global.getInstance().boolOpFloag = Global.BoolLogic.NOT_EQUAL;
-                            break;
-                        }
-
-                        for (int j = 0; j < var1.length; j++) {
-                            if (var1[j] != var2[j]) {
-                                diff = true;
-                            }
-                            if (diff) {
-                                Global.getInstance().boolOpFloag = Global.BoolLogic.NOT_EQUAL;
-                                break;
-                            }
-                        }
-
+                        cmp.exec();
                         break;
 
                     case "Inc":
                         Inc inc = (Inc) Global.getInstance().iSet.get(i);
-                        pointer = Global.getInstance().getVarPointerById(inc.arg1);
-                        byte[] var = Global.getInstance().memoryManager.readBlock(pointer);
-                        byteBuffer = ByteBuffer.wrap(var);
-                        if (var.length == 2) {
-                            byteBuffer = ByteBuffer.wrap(Global.getInstance().memoryManager.readBlock(pointer));
-                            int vShort = byteBuffer.getShort();
-                            vShort++;
-                            byteBuffer = ByteBuffer.allocate(2);
-                            byteBuffer.putInt(vShort);
-                            Global.getInstance().memoryManager.writeBlock(pointer, byteBuffer.array());
-                        } else if (var.length == 4) {
-                            byteBuffer = ByteBuffer.wrap(Global.getInstance().memoryManager.readBlock(pointer));
-                            int vInt = byteBuffer.getInt();
-                            vInt++;
-                            byteBuffer = ByteBuffer.allocate(4);
-                            byteBuffer.putInt(vInt);
-                            Global.getInstance().memoryManager.writeBlock(pointer, byteBuffer.array());
-                        } else {
-                            //Тут нужно как-то сгенерировать проверку типов
-                        }
+                        inc.exec();
                         break;
 
                     case "Dec":
                         Dec dec = (Dec) Global.getInstance().iSet.get(i);
-                        pointer = Global.getInstance().getVarPointerById(dec.arg1);
-                        byte[] vara = Global.getInstance().memoryManager.readBlock(pointer);
-                        byteBuffer = ByteBuffer.wrap(vara);
-                        if (vara.length == 2) {
-                            byteBuffer = ByteBuffer.wrap(Global.getInstance().memoryManager.readBlock(pointer));
-                            int vShort = byteBuffer.getShort();
-                            vShort--;
-                            byteBuffer = ByteBuffer.allocate(2);
-                            byteBuffer.putInt(vShort);
-                            Global.getInstance().memoryManager.writeBlock(pointer, byteBuffer.array());
-                        } else if (vara.length == 4) {
-                            byteBuffer = ByteBuffer.wrap(Global.getInstance().memoryManager.readBlock(pointer));
-                            int vInt = byteBuffer.getInt();
-                            vInt--;
-                            byteBuffer = ByteBuffer.allocate(4);
-                            byteBuffer.putInt(vInt);
-                            Global.getInstance().memoryManager.writeBlock(pointer, byteBuffer.array());
-                        } else {
-                            //Тут нужно как-то сгенерировать проверку типов
-                        }
+                        dec.exec();
                         break;
 
                     case "Mul":
@@ -149,51 +90,27 @@ public class ExecutorThread implements Runnable {
 
                     case "Xchg":
                         Xchg xchg = (Xchg) Global.getInstance().iSet.get(i);
-                        pointer = Global.getInstance().getVarPointerById(xchg.arg1);
-                        pointer2 = Global.getInstance().getVarPointerById(xchg.arg2);
-                        byte[] var1b = Global.getInstance().memoryManager.readBlock(pointer);
-                        byte[] var2b = Global.getInstance().memoryManager.readBlock(pointer2);
-                        if (var1b.length != var2b.length) {
-                            //Тут исключение несовместимости типов
-                        }
-                        byte[] median = var1b;
-                        var1b = var2b;
-                        var2b = median;
-                        Global.getInstance().memoryManager.writeBlock(pointer, var1b);
-                        Global.getInstance().memoryManager.writeBlock(pointer, var2b);
+                        xchg.exec();
                         break;
 
                     case "Lea":
                         Lea lea = (Lea) Global.getInstance().iSet.get(i);
-                        pointer = Global.getInstance().getVarPointerById(lea.arg1);
-                        pointer2 = Global.getInstance().getVarPointerById(lea.arg2);
-                        byteBuffer = ByteBuffer.allocate(4);
-                        byteBuffer.putShort((short) pointer.page);
-                        byteBuffer.putShort((short) pointer.offset);
-                        Global.getInstance().memoryManager.writeBlock(pointer2, byteBuffer.array());
+                        lea.exec();
                         break;
 
                     case "Int":
                         Int intetrrupt = (Int) Global.getInstance().iSet.get(i);
-                        Global.getInstance().interruptsManager.exexInterrupt(intetrrupt.arg1, intetrrupt.arg2);
+                        intetrrupt.exec();
                         break;
 
                     case "Loop":
                         Loop loop = (Loop) Global.getInstance().iSet.get(i);
-                        pointer = Global.getInstance().getVarPointerById(loop.arg1);
-                        byteBuffer = ByteBuffer.wrap(Global.getInstance().memoryManager.readBlock(pointer));
-                        int counter = byteBuffer.getInt();
-                        if (counter != 0) {
-                            i = loop.arg2 - 1;
-                            counter--;
-                            byteBuffer = ByteBuffer.allocate(4);
-                            byteBuffer.putInt(counter);
-                            Global.getInstance().memoryManager.writeBlock(pointer, byteBuffer.array());
-                        }
+                        i = loop.exec(i);
                         break;
 
                     case "Jmp":
-
+                        Jmp jmp = (Jmp) Global.getInstance().iSet.get(i);
+                        i = jmp.exec();
                         break;
 
                     case "Div":
@@ -204,77 +121,84 @@ public class ExecutorThread implements Runnable {
 
                         break;
 
-                    case "Je":
-
+                    case "Je": //Если равно
+                        Je je = (Je) Global.getInstance().iSet.get(i);
+                        i = je.exec(i);
                         break;
 
-                    case "Jz":
-
+                    case "Jz": //Если ноль
+                        Jz jz = (Jz) Global.getInstance().iSet.get(i);
+                        i = jz.exec(i);
                         break;
 
-                    case "Jg":
-
-
-                    case "Jge":
-
+                    case "Jg": //Если больше
+                        Jg jg = (Jg) Global.getInstance().iSet.get(i);
+                        i = jg.exec(i);
                         break;
 
-                    case "Jl":
-
+                    case "Jge": //Если больше или равно
+                        Jge jge = (Jge) Global.getInstance().iSet.get(i);
+                        i = jge.exec(i);
                         break;
 
-                    case "Jle":
-
+                    case "Jl": //Если меньше
+                        Jl jl = (Jl) Global.getInstance().iSet.get(i);
+                        i = jl.exec(i);
                         break;
 
-                    case "Jne":
-
+                    case "Jle": //Если меньше или равно
+                        Jle jle = (Jle) Global.getInstance().iSet.get(i);
+                        i = jle.exec(i);
                         break;
 
-                    case "Jnge":
-
+                    case "Jne": //Если не равно
+                        Jne jne = (Jne) Global.getInstance().iSet.get(i);
+                        i = jne.exec(i);
                         break;
 
-                    case "Jnl":
-
+                    case "Jnge": //Если не больше или равно
+                        Jnge jnge = (Jnge) Global.getInstance().iSet.get(i);
+                        i = jnge.exec(i);
                         break;
 
-                    case "Jnle":
+                    case "Jnl": //Если не меньше
+                        Jnl jnl = (Jnl) Global.getInstance().iSet.get(i);
+                        i = jnl.exec(i);
+                        break;
 
+                    case "Jnle": //Если не меньше или равно
+                        Jnle jnle = (Jnle) Global.getInstance().iSet.get(i);
+                        i = jnle.exec(i);
                         break;
 
                     case "Out":
                         Out out = (Out) Global.getInstance().iSet.get(i);
-                        Global.getInstance().ports[out.arg1] = out.arg2;
+                        out.exec();
                         break;
 
                     case "Inp":
-
+                        Inp inp = (Inp) Global.getInstance().iSet.get(i);
+                        inp.exec();
                         break;
 
                     case "Db":
                         Db db = (Db) Global.getInstance().iSet.get(i);
-                        pointer = Global.getInstance().memoryManager.allocate(db.arg2);
-                        Global.getInstance().varMap.add(new Var(db.arg1, pointer, db.arg2));
-
+                        db.exec();
                         break;
 
                     case "Set":
                         Set set = (Set) Global.getInstance().iSet.get(i);
-                        pointer = Global.getInstance().getVarPointerById(set.arg1);
-                        Global.getInstance().memoryManager.writeBlock(pointer, set.arg3);
+                        set.exec();
                         break;
 
                     case "Pushv":
-
+                        Pushv pushv = (Pushv) Global.getInstance().iSet.get(i);
+                        pushv.exec();
                         break;
 
                     case "Outv":
                         Outv outv = (Outv) Global.getInstance().iSet.get(i);
-                        pointer = Global.getInstance().getVarPointerById(outv.arg2);
-                        byte[] vlaue = Global.getInstance().memoryManager.readBlock(pointer);
-                        byteBuffer = ByteBuffer.wrap(vlaue);
-                        Global.getInstance().ports[0] = byteBuffer.getInt();
+                        outv.exec();
                         break;
                 }
             } catch (Exception e) {

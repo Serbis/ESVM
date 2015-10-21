@@ -2,7 +2,6 @@ package esvm.controllers;
 
 import esvm.App;
 import esvm.vm.InterruptsManager;
-import esvm.vm.exceptions.StackOverflowException;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -94,12 +93,14 @@ public class FXMLAIOTab implements Initializable{
             int count = 0;
             for (int i = 0; i < text.length(); i++) {
                 char ch = text.charAt(i);
-                try {
-                    App.getInstance().esvm.getMemoryManager().push(ch);
-                    count++;
-                } catch (StackOverflowException e) {
-                    e.printStackTrace();
-                }
+                //try {
+                //    ByteBuffer byteBuffer = ByteBuffer.allocate(4);
+                //    byteBuffer.putChar(ch);
+                    //App.getInstance().esvm.getMemoryManager().push(byteBuffer.array());
+               //     count++;
+               // } catch (StackOverflowException e) {
+                //    e.printStackTrace();
+                //}
             }
             App.getInstance().esvm.getGlobal().putToPort(2, count);     //Размещаем в порте ввода размер записанных в стек значений!!!
             App.getInstance().esvm.getGlobal().getExecutorThread().stoped = false;

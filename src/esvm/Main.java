@@ -27,7 +27,6 @@ public class Main extends Application {
             primaryStage.setTitle("ExoScript Virtual Machine Debugger");
             fxmlaMain.setStage(primaryStage);
             primaryStage.show();
-
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox fx:id="vBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1300.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="esvm.controllers.FXMLACFCTab">
+   <children>
+      <HBox prefHeight="12.0" prefWidth="1300.0">
+         <children>
+            <Label prefHeight="16.0" prefWidth="650.0" text="Constant pool" />
+            <Label text="Interfaces" />
+         </children>
+      </HBox>
+      <HBox prefHeight="200.0" prefWidth="650.0">
+         <children>
+            <ListView fx:id="lvConstantPool" prefHeight="200.0" prefWidth="650.0" />
+            <ListView fx:id="lvInterfaces" prefHeight="200.0" prefWidth="650.0" />
+         </children>
+      </HBox>
+       <HBox prefHeight="12.0" prefWidth="1300.0">
+       <children>
+           <Label prefHeight="16.0" prefWidth="650.0" text="Fields" />
+           <Label text="Method" />
+       </children>
+       </HBox>
+       <HBox prefHeight="200.0" prefWidth="650.0">
+           <children>
+               <ListView fx:id="lvFields" prefHeight="200.0" prefWidth="650.0" />
+               <ListView fx:id="lvMethds" prefHeight="200.0" prefWidth="650.0" />
+           </children>
+       </HBox>
+       <HBox prefHeight="12.0" prefWidth="1300.0">
+           <children>
+               <Label prefHeight="16.0" prefWidth="650.0" text="Attributes" />
+           </children>
+       </HBox>
+       <HBox prefHeight="200.0" prefWidth="650.0">
+           <children>
+               <ListView fx:id="lvAttributes" prefHeight="200.0" prefWidth="650.0" />
+            <VBox prefHeight="200.0" prefWidth="650.0">
+               <children>
+                  <HBox prefHeight="34.0" prefWidth="650.0">
+                     <children>
+                        <TextField prefHeight="26.0" prefWidth="326.0" promptText="Minor Version" />
+                        <TextField prefHeight="26.0" prefWidth="325.0" promptText="Major Version" />
+                     </children>
+                  </HBox>
+                   <HBox prefHeight="34.0" prefWidth="650.0">
+                       <children>
+                           <TextField prefHeight="26.0" prefWidth="326.0" promptText="This class" />
+                           <TextField prefHeight="26.0" prefWidth="325.0" promptText="Super class" />
+                       </children>
+                   </HBox>
+                  <HBox prefHeight="30.0" prefWidth="650.0">
+                     <children>
+                        <CheckBox mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="PUBLIC" />
+                        <CheckBox mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="PRIVATE" />
+                        <CheckBox mnemonicParsing="false" text="PROTECTED" />
+                     </children>
+                  </HBox>
+                   <HBox prefHeight="30.0" prefWidth="650.0">
+                       <children>
+                           <CheckBox mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="STATIC" />
+                           <CheckBox mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="FINAL" />
+                           <CheckBox mnemonicParsing="false" text="VOLATILE" />
+                       </children>
+                   </HBox>
+                   <HBox prefHeight="30.0" prefWidth="650.0">
+                       <children>
+                           <CheckBox mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="TRANSIENT" />
+                           <CheckBox mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="SYNTHETIC" />
+                           <CheckBox mnemonicParsing="false" text="ENUM" />
+                       </children>
+                   </HBox>
+               </children></VBox>
+           </children>
+       </HBox>
+   </children>
+</VBox>

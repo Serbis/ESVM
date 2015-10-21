@@ -3,6 +3,7 @@ package esvm.vm;
 
 import esvm.vm.desc.Block;
 import esvm.vm.desc.Pointer;
+import esvm.vm.desc.StackObject;
 import esvm.vm.exceptions.*;
 
 import java.io.File;
@@ -15,15 +16,15 @@ import java.util.ArrayList;
  */
 public class MemoryManager {
     private byte[] MEMORY;
-    private byte[] STACK;
+    private ArrayList<StackObject> STACK;
     private ArrayList<Block> blocks = new ArrayList<Block>();
 
     private int bs;
     private int pageCount;
     private int memorysize;
     private int stacksizeinbyte;
-    private int stacksizeinint;
-    private int stackpointer = -4; //Указатель на вершину стека
+    private int stackbytecounter = 0;
+    private int stackpointer = 0; //Указатель на вершину стека
 
     public MemoryManager() {
 
@@ -44,15 +45,12 @@ public class MemoryManager {
         //if (stacksize % 4 != 0) {
         //    throw new MemoryDetermineException("Stack size is not a multiple of 4");
         //}
-        stacksizeinint = stacksize / 4;
+        //stacksizeinint = stacksize / 4;
         MEMORY = new byte[memorysize]; //Созадли пустой массив байт
         for (int i = 0; i < memorysize; i++) { //Заполняем его нулями
             MEMORY[i] = 0;
         }
-        STACK = new byte[stacksizeinbyte];
-        for (int i = 0; i < stacksizeinbyte; i++) {
-            STACK[i] = 0;
-        }
+        STACK.clear();
     }
 
     /**
@@ -302,19 +300,16 @@ public class MemoryManager {
     /**
      * Помещает значение в стек
      *
-     * @param integer значение
+     * @param bytes значение
      * @throws StackOverflowException в случае преполнения стека
      */
-    public void push(int integer) throws StackOverflowException{
-        if (stackpointer != stacksizeinint - 4) {
+    public void push(byte[] bytes, StackObject.StackDataType stackDataType) throws StackOverflowException{
+        if (stacksizeinbyte >= stackbytecounter) {
             byte[] byteArray;
 
-            stackpointer += 4;
-            byteArray = ByteBuffer.allocate(4).putInt(integer).array();
-            for (int i = 0; i < byteArray.length; i++) {
-                STACK[stackpointer + i] = byteArray[i];
-            }
-
+            stackpointer++;
+            stackbytecounter += bytes.length;
+            STACK.add(new StackObject(bytes, stackDataType));
         } else {
             throw new StackOverflowException("Stack overflow, the maximum stack size " + String.valueOf(stacksizeinbyte));
         }
@@ -326,16 +321,12 @@ public class MemoryManager {
      * @return значение
      * @throws NullReferenceException в случае если стек пуст
      */
-    public int pop() throws NullReferenceException{
+    public StackObject pop() throws NullReferenceException{
         if (stackpointer >= 0) {
-            byte[] bytes = new byte[4];
-            for (int i = 0; i < bytes.length; i++) {
-                bytes[i] = STACK[stackpointer + i];
-                STACK[stackpointer + i] = 0;
-            }
-            stackpointer -= 4;
-            ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
-            return byteBuffer.getInt();
+            StackObject stackObject = STACK.get(stackpointer);
+            stackpointer--;
+            stackbytecounter -= stackObject.data.length;
+            return stackObject;
         } else {
             throw new NullReferenceException("Stack is empty");
         }
@@ -454,7 +445,7 @@ public class MemoryManager {
      * @return ссылка на файл с дампом
      * @throws MemoryOutOfRangeException в случае если колчество указанных
      *      занчений физически превышает размер стека
-     */
+     *//*
     public File dumpstack(int startvalue, int count) throws StackOutOfRangeException {
         if (startvalue + count > STACK.length / 4) { //Проверям на то, что мы не вылезем за пределы адрессного пространства
             throw new StackOutOfRangeException("The requested dump is beyond the limit of the address space. " +
@@ -485,7 +476,7 @@ public class MemoryManager {
         }
 
         return file;
-    }
+    }*/
 
 
 }

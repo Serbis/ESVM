@@ -9,4 +9,8 @@ public class Sub extends Instruction{
     public Sub() {
         asm = "Sub";
     }
+
+    public void exec() {
+        //Global.getInstance().memoryManager.push(Global.getInstance().memoryManager.pop() - Global.getInstance().memoryManager.pop());
+    }
 }

@@ -1,5 +1,7 @@
 package esvm.vm.instructions;
 
+import esvm.vm.Global;
+
 /**
  * Created by serbis on 13.10.15.
  */
@@ -12,5 +14,9 @@ public class Out extends Instruction{
         this.arg1 = arg1;
         this.arg2 = arg2;
         asm = "Out";
+    }
+
+    public void exec() {
+        Global.getInstance().ports[this.arg1] = this.arg2;
     }
 }

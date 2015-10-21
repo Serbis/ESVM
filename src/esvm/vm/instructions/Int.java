@@ -1,5 +1,8 @@
 package esvm.vm.instructions;
 
+import esvm.vm.Global;
+import esvm.vm.exceptions.InterruptNotFoundException;
+
 /**
  * Created by serbis on 13.10.15.
  */
@@ -12,5 +15,9 @@ public class Int extends Instruction{
         this.arg1 = arg1;
         this.arg2 = arg2;
         asm = "Int";
+    }
+
+    public void exec() throws InterruptNotFoundException {
+        Global.getInstance().interruptsManager.exexInterrupt(this.arg1, this.arg2);
     }
 }

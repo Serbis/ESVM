@@ -111,22 +111,26 @@ public class FXMLAMain implements Initializable{
         FXMLLoader loaderDDMTab = new FXMLLoader(getClass().getResource("ddmtab.fxml"));
         FXMLLoader loaderGcTab = new FXMLLoader(getClass().getResource("gctab.fxml"));
         FXMLLoader loaderAsmTab = new FXMLLoader(getClass().getResource("asm.fxml"));
+        FXMLLoader loaderCfcTab = new FXMLLoader(getClass().getResource("cfc.fxml"));
         VBox ioTab = null;
         VBox dumpTab = null;
         VBox ddmTab = null;
         VBox gcTab = null;
         VBox asmTab = null;
+        VBox cfcTab = null;
         try {
             ioTab = (VBox)loaderIOTab.load();
             dumpTab = (VBox)loaderDumpTab.load();
             ddmTab = (VBox)loaderDDMTab.load();
             gcTab = (VBox)loaderGcTab.load();
             asmTab = (VBox)loaderAsmTab.load();
+            cfcTab = (VBox)loaderCfcTab.load();
             tabPane.getTabs().get(0).setContent(ioTab);
             tabPane.getTabs().get(1).setContent(dumpTab);
             tabPane.getTabs().get(2).setContent(ddmTab);
             tabPane.getTabs().get(3).setContent(gcTab);
             tabPane.getTabs().get(4).setContent(asmTab);
+            tabPane.getTabs().get(5).setContent(cfcTab);
             fxmlaDumpTab = loaderDumpTab.getController();
             fxmladdmTab = loaderDDMTab.getController();
             fxmlaioTab = loaderIOTab.getController();
