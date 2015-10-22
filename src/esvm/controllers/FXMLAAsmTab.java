@@ -1,5 +1,7 @@
 package esvm.controllers;
 
+import esvm.vm.desc.attributes.AttrCode;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextArea;
@@ -51,14 +53,19 @@ public class FXMLAAsmTab implements Initializable{
         return taCode.getText().replaceAll("\n", "");
     }
 
-    /**
-     * Помещает очередную ошибку в поле вывода ошибков
-     *
-     * @param text текст ошибки
-     */
-    public void putError(String text) {
-        errorsline += text + "\n";
-        taErrors.setText(errorsline);
+    public void actionOK() {
+        FXMLACFCTab.getInstance().addItemToAttributes("attribute_code");
+        FXMLACFCTab.getInstance().attrArray.add(new AttrCode(getCode()));
+        stage.close();
+    }
+
+
+    @FXML protected void handleslbtnCancelAction(ActionEvent event) {
+        stage.close();
+    }
+
+    @FXML protected void handleslbtnOkAction(ActionEvent event) {
+        actionOK();
     }
 
 

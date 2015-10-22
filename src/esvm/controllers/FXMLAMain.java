@@ -5,7 +5,6 @@ import esvm.dialogs.StandartDialogs;
 import esvm.vm.ESVM;
 import esvm.vm.InterruptsManager;
 import esvm.vm.compiler.Assembler;
-import esvm.vm.desc.AsmLine;
 import esvm.vm.desc.Vmspec;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -25,7 +24,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.ResourceBundle;
@@ -129,8 +127,8 @@ public class FXMLAMain implements Initializable{
             tabPane.getTabs().get(1).setContent(dumpTab);
             tabPane.getTabs().get(2).setContent(ddmTab);
             tabPane.getTabs().get(3).setContent(gcTab);
-            tabPane.getTabs().get(4).setContent(asmTab);
-            tabPane.getTabs().get(5).setContent(cfcTab);
+            tabPane.getTabs().get(4).setContent(cfcTab);
+            //tabPane.getTabs().get(5).setContent(cfcTab);
             fxmlaDumpTab = loaderDumpTab.getController();
             fxmladdmTab = loaderDDMTab.getController();
             fxmlaioTab = loaderIOTab.getController();
@@ -218,28 +216,16 @@ public class FXMLAMain implements Initializable{
 
     private void loadClass(File file) {
         App.getInstance().esvm = new ESVM(new Vmspec(128, 2, 128, file.getPath()));
-        // try {
-        //App.getInstance().esvm.getMemoryManager().write(new Pointer(0, 127), new byte[] {45});
-        //App.getInstance().esvm.getMemoryManager().write(new Pointer(1, 0), new byte[] {127, 127});
-        //App.getInstance().esvm.getMemoryManager().callocate(new Pointer(1, 6), 4);
-        //App.getInstance().esvm.getMemoryManager().callocate(new Pointer(0, 0), 4);
-        //App.getInstance().esvm.getMemoryManager().writeBlock(new Pointer(1, 6), new byte[]{22, 22, 22, 22});
-        //App.getInstance().esvm.getMemoryManager().rellocate(new Pointer(1, 6), new Pointer(0, 4));
-        //App.getInstance().esvm.getMemoryManager().push(6511);
-        //App.getInstance().esvm.getMemoryManager().push(49634);
-        //} catch (MemoryOutOfRangeException | MemoryAllocateException | MemoryNullBlockException | StackOverflowException e) {
-        //    e.printStackTrace();
-        //}
 
-        App.getInstance().breakpoints = new boolean[App.getInstance().esvm.getGlobal().getInstructionsCount()];
-        for (int i = 0; i < App.getInstance().esvm.getGlobal().getInstructionsCount(); i++) { //Заполняем массив брекпоинтов пустышками
-            App.getInstance().breakpoints[i] = false;
-        }
-        AsmLine[] asmLines = App.getInstance().esvm.getDisassembler().getAsm();
-        fxmladdmTab.initCodePane(asmLines);
+        //App.getInstance().breakpoints = new boolean[App.getInstance().esvm.getGlobal().getInstructionsCount()];
+        ////for (int i = 0; i < App.getInstance().esvm.getGlobal().getInstructionsCount(); i++) { //Заполняем массив брекпоинтов пустышками
+        ///    App.getInstance().breakpoints[i] = false;
+        //}
+        //AsmLine[] asmLines = App.getInstance().esvm.getDisassembler().getAsm();
+        //fxmladdmTab.initCodePane(asmLines);
         fxmladdmTab.initBinPane(file);
-        fxmladdmTab.initStackPane();
-        fxmladdmTab.initDebug();
+        //fxmladdmTab.initStackPane();
+        //fxmladdmTab.initDebug();
         fxmlaioTab.classLoaded();
         App.getInstance().loadMemoryDupmFromVm(fxmlaDumpTab);
         tbbtnRun.setDisable(false);
@@ -300,11 +286,12 @@ public class FXMLAMain implements Initializable{
      *
      */
     private void actionSave() {
-        Assembler assembler = new Assembler();
+        FXMLACFCTab.getInstance().saveClassFile();
+        /*Assembler assembler = new Assembler();
         assembler.setOnErrorListener(new Assembler.ErrorListener() {
             @Override
             public void onErrorListener(String text) {
-                FXMLAAsmTab.getInstance().putError(text);
+               // FXMLAAsmTab.getInstance().putError(text);
             }
         });
         String code = FXMLAAsmTab.getInstance().getCode();
@@ -335,7 +322,7 @@ public class FXMLAMain implements Initializable{
                     e.printStackTrace();
                 }
             }
-        }
+        }*/
     }
 
     private void actionIntegrate() {
@@ -343,7 +330,7 @@ public class FXMLAMain implements Initializable{
         assembler.setOnErrorListener(new Assembler.ErrorListener() {
             @Override
             public void onErrorListener(String text) {
-                FXMLAAsmTab.getInstance().putError(text);
+                //FXMLAAsmTab.getInstance().putError(text);
             }
         });
         String code = FXMLAAsmTab.getInstance().getCode();

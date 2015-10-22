@@ -10,8 +10,10 @@
    <children>
       <HBox prefHeight="12.0" prefWidth="1300.0">
          <children>
-            <Label prefHeight="16.0" prefWidth="650.0" text="Constant pool" />
-            <Label text="Interfaces" />
+            <Label prefHeight="16.0" prefWidth="618.0" text="Constant pool" />
+             <Button onAction="#handleslbtnAddConstantAction" mnemonicParsing="false" text="+" />
+            <Label prefHeight="16.0" prefWidth="618.0" text="Interfaces" />
+             <Button onAction="#handleslbtnAddInterfaceAction" mnemonicParsing="false" text="+" />
          </children>
       </HBox>
       <HBox prefHeight="200.0" prefWidth="650.0">
@@ -22,8 +24,10 @@
       </HBox>
        <HBox prefHeight="12.0" prefWidth="1300.0">
        <children>
-           <Label prefHeight="16.0" prefWidth="650.0" text="Fields" />
-           <Label text="Method" />
+           <Label prefHeight="16.0" prefWidth="618.0" text="Fields" />
+           <Button onAction="#handleslbtnAddFieldAction" mnemonicParsing="false" text="+" />
+           <Label prefWidth="618.0" text="Methods" />
+           <Button onAction="#handleslbtnAddMethodAction" mnemonicParsing="false" text="+" />
        </children>
        </HBox>
        <HBox prefHeight="200.0" prefWidth="650.0">
@@ -34,7 +38,8 @@
        </HBox>
        <HBox prefHeight="12.0" prefWidth="1300.0">
            <children>
-               <Label prefHeight="16.0" prefWidth="650.0" text="Attributes" />
+               <Label prefHeight="16.0" prefWidth="618.0" text="Attributes" />
+               <Button onAction="#handleslbtnAddAttributeAction" mnemonicParsing="false" text="+" />
            </children>
        </HBox>
        <HBox prefHeight="200.0" prefWidth="650.0">
@@ -44,35 +49,35 @@
                <children>
                   <HBox prefHeight="34.0" prefWidth="650.0">
                      <children>
-                        <TextField prefHeight="26.0" prefWidth="326.0" promptText="Minor Version" />
-                        <TextField prefHeight="26.0" prefWidth="325.0" promptText="Major Version" />
+                        <TextField fx:id="tfMinor" prefHeight="26.0" prefWidth="326.0" promptText="Minor Version" text="1" />
+                        <TextField fx:id="tfMajor" prefHeight="26.0" prefWidth="325.0" promptText="Major Version" text="1"/>
                      </children>
                   </HBox>
                    <HBox prefHeight="34.0" prefWidth="650.0">
                        <children>
-                           <TextField prefHeight="26.0" prefWidth="326.0" promptText="This class" />
-                           <TextField prefHeight="26.0" prefWidth="325.0" promptText="Super class" />
+                           <TextField fx:id="tfThis" prefHeight="26.0" prefWidth="326.0" promptText="This class" text="null" />
+                           <TextField fx:id="tfSuper" prefHeight="26.0" prefWidth="325.0" promptText="Super class" text="null"/>
                        </children>
                    </HBox>
                   <HBox prefHeight="30.0" prefWidth="650.0">
                      <children>
-                        <CheckBox mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="PUBLIC" />
-                        <CheckBox mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="PRIVATE" />
-                        <CheckBox mnemonicParsing="false" text="PROTECTED" />
+                        <CheckBox fx:id="cbPublic" mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" selected="true" text="PUBLIC" />
+                        <CheckBox fx:id="cbPrivate" mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="PRIVATE" />
+                        <CheckBox fx:id="cbProtected" mnemonicParsing="false" text="PROTECTED" />
                      </children>
                   </HBox>
                    <HBox prefHeight="30.0" prefWidth="650.0">
                        <children>
-                           <CheckBox mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="STATIC" />
-                           <CheckBox mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="FINAL" />
-                           <CheckBox mnemonicParsing="false" text="VOLATILE" />
+                           <CheckBox fx:id="cbStatic" mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="STATIC" />
+                           <CheckBox fx:id="cbFinal" mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="FINAL" />
+                           <CheckBox fx:id="cbVolatile" mnemonicParsing="false" text="VOLATILE" />
                        </children>
                    </HBox>
                    <HBox prefHeight="30.0" prefWidth="650.0">
                        <children>
-                           <CheckBox mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="TRANSIENT" />
-                           <CheckBox mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="SYNTHETIC" />
-                           <CheckBox mnemonicParsing="false" text="ENUM" />
+                           <CheckBox fx:id="cbTrtansient" mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="TRANSIENT" />
+                           <CheckBox fx:id="cbSynthetic" mnemonicParsing="false" prefHeight="18.0" prefWidth="200.0" text="SYNTHETIC" />
+                           <CheckBox fx:id="cbEnum" mnemonicParsing="false" text="ENUM" />
                        </children>
                    </HBox>
                </children></VBox>

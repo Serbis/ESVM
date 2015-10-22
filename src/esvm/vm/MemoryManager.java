@@ -16,7 +16,7 @@ import java.util.ArrayList;
  */
 public class MemoryManager {
     private byte[] MEMORY;
-    private ArrayList<StackObject> STACK;
+    private ArrayList<StackObject> STACK = new ArrayList<StackObject>();
     private ArrayList<Block> blocks = new ArrayList<Block>();
 
     private int bs;

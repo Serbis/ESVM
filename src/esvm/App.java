@@ -1,14 +1,12 @@
 package esvm;
 
 
-import esvm.controllers.FXMLADDMTab;
 import esvm.controllers.FXMLADumpTab;
 import esvm.controllers.controls.LabelMeta;
-import esvm.fields.Address;
-import esvm.fields.ByteModel;
+import esvm.desc.Address;
+import esvm.desc.ByteModel;
 import esvm.vm.ESVM;
 import esvm.vm.exceptions.MemoryOutOfRangeException;
-import esvm.vm.exceptions.StackOutOfRangeException;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;

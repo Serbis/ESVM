@@ -1,8 +1,8 @@
 package esvm.vm;
 
-import esvm.vm.desc.Pointer;
-import esvm.vm.desc.Var;
-import esvm.vm.desc.Vmspec;
+import esvm.vm.desc.*;
+import esvm.vm.desc.attributes.ClassAttribute;
+import esvm.vm.desc.constpool.ClassConstant;
 import esvm.vm.exceptions.InterruptNotFoundException;
 import esvm.vm.exceptions.MemoryAllocateException;
 import esvm.vm.exceptions.MemoryNullBlockException;
@@ -25,6 +25,15 @@ public class Global {
     private ExecutorThread executorThread;   //Экземпляр потока исполнения
     public Vmspec vmspec; //Экземпляр конфигурации вм
     public BoolLogic boolOpFloag; //Флаг результат булевой операции
+    public ArrayList<ClassConstant> counstant_pool = new ArrayList<ClassConstant>();
+    public ArrayList<ClassField> fields = new ArrayList<ClassField>();
+    public ArrayList<ClassMethod> methods = new ArrayList<ClassMethod>();
+    public ArrayList<ClassAttribute> attributes = new ArrayList<ClassAttribute>();
+    public ArrayList<ArrayList<Instruction>> code = new ArrayList<ArrayList<Instruction>>();
+
+    public short access_flags;
+    public short this_class;
+    public short super_class;
 
     public Global() {
         initPorts();
