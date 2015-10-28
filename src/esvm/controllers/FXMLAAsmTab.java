@@ -1,6 +1,5 @@
 package esvm.controllers;
 
-import esvm.vm.desc.attributes.AttrCode;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -55,7 +54,7 @@ public class FXMLAAsmTab implements Initializable{
 
     public void actionOK() {
         FXMLACFCTab.getInstance().addItemToAttributes("attribute_code");
-        FXMLACFCTab.getInstance().attrArray.add(new AttrCode(getCode()));
+       // FXMLACFCTab.getInstance().attrArray.add(new AttrCode(getCode()));
         stage.close();
     }
 

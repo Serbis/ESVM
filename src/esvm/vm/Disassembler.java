@@ -21,8 +21,8 @@ public class Disassembler {
      *
      * @return массив объектов строк
      */
-    public AsmLine[] getAsm() {
-        ArrayList<Instruction> lociset = Global.getInstance().iSet;
+    public AsmLine[] getAsm(int mid) {
+        ArrayList<Instruction> lociset = Global.getInstance().code.get(mid);
         AsmLine[] asmLines = new AsmLine[lociset.size()];
 
         for (int i = 0; i < lociset.size(); i++) {
@@ -69,9 +69,9 @@ public class Disassembler {
                     asmLine.com += "();";
                     break;
 
-                case "Movis":
-                    Movis movis = (Movis) lociset.get(i);
-                    asmLine.com += "(" + String.valueOf(movis.arg1) + ");";
+                case "Method":
+                    Method method = (Method) lociset.get(i);
+                    asmLine.com += "(" + String.valueOf(method.arg1) + ");";
                     break;
 
                 case "Movos":

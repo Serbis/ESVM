@@ -22,12 +22,16 @@ public class InterruptsManager {
     public interface InterruptInterface_1_2 {       //Исключение
         public void onInterrupt_interface_1_2(String text);
     }
+    public interface InterruptInterface_1_3 {       //Переход в другой метод
+        public void onInterrupt_interface_1_3(int id);
+    }
 
     private InterruptInterface_0_0 interruptInterface_0_0;  //Интерфейс stdout
     private InterruptInterface_0_1 interruptInterface_0_1;  //Интерфейс stdin
     private InterruptInterface_1_0 interruptInterface_1_0;
     private InterruptInterface_1_1 interruptInterface_1_1;
     private InterruptInterface_1_2 interruptInterface_1_2;
+    private InterruptInterface_1_3 interruptInterface_1_3;
 
     private Thread thread;
 
@@ -64,6 +68,8 @@ public class InterruptsManager {
                 interrupt_1_1();
             } else if (subtype == 2) {
                 interrupt_1_2();
+            } else if (subtype == 3) {
+                interrupt_1_3();
             } else {
             throw new InterruptNotFoundException("Interrupt " + String.valueOf(type + ":" + subtype) + " not found");
         }
@@ -130,6 +136,15 @@ public class InterruptsManager {
         }
     }
 
+    /**
+     * Класс : Системное прерывание
+     * Подкласс : Переход в метод
+     *
+     */
+    private void interrupt_1_3() {
+        interruptInterface_1_3.onInterrupt_interface_1_3(Global.getInstance().ports[2]);
+    }
+
     public void setInterruptInterface_0_0(InterruptInterface_0_0 interruptInterface_0_0) {
         this.interruptInterface_0_0 = interruptInterface_0_0;
     }
@@ -148,5 +163,9 @@ public class InterruptsManager {
 
     public void setInterruptInterface_1_2(InterruptInterface_1_2 interruptInterface_1_2) {
         this.interruptInterface_1_2 = interruptInterface_1_2;
+    }
+
+    public void setInterruptInterface_1_3(InterruptInterface_1_3 interruptInterface_1_3) {
+        this.interruptInterface_1_3 = interruptInterface_1_3;
     }
 }

@@ -92,8 +92,8 @@ public class Global {
         ports[portnum] = value;
     }
 
-    public int getInstructionsCount() {
-        return iSet.size();
+    public int getInstructionsCount(int mid) {
+        return code.get(mid).size();
     }
 
     /**

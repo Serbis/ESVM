@@ -5,6 +5,7 @@ import esvm.dialogs.StandartDialogs;
 import esvm.vm.ESVM;
 import esvm.vm.InterruptsManager;
 import esvm.vm.compiler.Assembler;
+import esvm.vm.desc.AsmLine;
 import esvm.vm.desc.Vmspec;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -217,15 +218,15 @@ public class FXMLAMain implements Initializable{
     private void loadClass(File file) {
         App.getInstance().esvm = new ESVM(new Vmspec(128, 2, 128, file.getPath()));
 
-        //App.getInstance().breakpoints = new boolean[App.getInstance().esvm.getGlobal().getInstructionsCount()];
-        ////for (int i = 0; i < App.getInstance().esvm.getGlobal().getInstructionsCount(); i++) { //Заполняем массив брекпоинтов пустышками
-        ///    App.getInstance().breakpoints[i] = false;
-        //}
-        //AsmLine[] asmLines = App.getInstance().esvm.getDisassembler().getAsm();
-        //fxmladdmTab.initCodePane(asmLines);
+        App.getInstance().breakpoints = new boolean[App.getInstance().esvm.getGlobal().getInstructionsCount(0)];
+        for (int i = 0; i < App.getInstance().esvm.getGlobal().getInstructionsCount(0); i++) { //Заполняем массив брекпоинтов пустышками
+            App.getInstance().breakpoints[i] = false;
+        }
+        AsmLine[] asmLines = App.getInstance().esvm.getDisassembler().getAsm(0);
+        fxmladdmTab.initCodePane(asmLines);
         fxmladdmTab.initBinPane(file);
-        //fxmladdmTab.initStackPane();
-        //fxmladdmTab.initDebug();
+        fxmladdmTab.initStackPane();
+        fxmladdmTab.initDebug();
         fxmlaioTab.classLoaded();
         App.getInstance().loadMemoryDupmFromVm(fxmlaDumpTab);
         tbbtnRun.setDisable(false);

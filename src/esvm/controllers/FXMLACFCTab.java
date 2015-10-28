@@ -9,6 +9,7 @@ import esvm.enums.AccessFlags;
 import esvm.models.RowModelSingle;
 import esvm.models.XCellSingle;
 import esvm.vm.compiler.Assembler;
+import esvm.vm.desc.attributes.LocalVariableTRow;
 import esvm.vm.desc.constpool.*;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -65,18 +66,47 @@ public class FXMLACFCTab implements Initializable{
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        String const_1 = "method_1";
+        String const_2 = "method_2";
+        String const_3 = "N";
+        String const_4 = "I";
+        String const_5 = "m1_a";
+        String const_6 = "m1_b";
+        String const_7 = "m2_a";
+        String const_8 = "m2_b";
+
         byte[] bytes1 = new byte[] {0, 0, 0, 1};
         byte[] bytes2 = new byte[] {62, 100, 100, 100};
         byte[] bytes3 = new byte[] {66, 66, 66, 66};
-        constantPoolArray.add(new ConstInteger(bytes1));
-        constantPoolArray.add(new ConstFloat(bytes2));
-        constantPoolArray.add(new ConstString((short) 3));
-        constantPoolArray.add(new ConstUtf_8(4, bytes3));
-        constantPoolArray.add(new ConstMethodHandle((byte) 0, (short) 1));
-        constantPoolArray.add(new ConstMethodType((short) 1));
+        constantPoolArray.add(new ConstInteger(bytes1));    //0
+        constantPoolArray.add(new ConstFloat(bytes2));      //1
+        constantPoolArray.add(new ConstString((short) 3));  //2
+        constantPoolArray.add(new ConstUtf_8(4, bytes3));   //3
+        constantPoolArray.add(new ConstUtf_8(8, const_1.getBytes()));       //4
+        constantPoolArray.add(new ConstUtf_8(8, const_2.getBytes()));       //5
+        constantPoolArray.add(new ConstUtf_8(1, const_3.getBytes()));       //6
+        constantPoolArray.add(new ConstUtf_8(1, const_4.getBytes()));       //7
+        constantPoolArray.add(new ConstUtf_8(4, const_5.getBytes()));       //8
+        constantPoolArray.add(new ConstUtf_8(4, const_6.getBytes()));       //9
+        constantPoolArray.add(new ConstUtf_8(4, const_7.getBytes()));       //10
+        constantPoolArray.add(new ConstUtf_8(4, const_8.getBytes()));       //11
+        constantPoolArray.add(new ConstMethodHandle((byte) 0, (short) 1));  //
+        constantPoolArray.add(new ConstMethodType((short) 1));              //
+
+
         fieldsArray.add(new ClassField(AccessFlags.ACC_PUBLIC, (short) 1, (short) 1));
-        methodArray.add(new ClassMethod(AccessFlags.ACC_PUBLIC, (short) 1, (short) 1, (short) 0));
-        attrArray.add(new AttrCode("Push(1);Pop(1);Int(1, 1);"));
+
+        methodArray.add(new ClassMethod(AccessFlags.ACC_PUBLIC, (short) 4, (short) 6, (short) 0));
+        methodArray.add(new ClassMethod(AccessFlags.ACC_PUBLIC, (short) 5, (short) 6, (short) 1));
+
+        ArrayList<LocalVariableTRow> localVariableTable1 = new ArrayList<LocalVariableTRow>();
+        localVariableTable1.add(new LocalVariableTRow((short) 8, (short) 7, (short) 0));
+        localVariableTable1.add(new LocalVariableTRow((short) 9, (short) 7, (short) 1));
+        attrArray.add(new AttrCode("Int(0, 1);Method(1);", localVariableTable1));
+        ArrayList<LocalVariableTRow> localVariableTable2 = new ArrayList<LocalVariableTRow>();
+        localVariableTable2.add(new LocalVariableTRow((short) 10, (short) 7, (short) 0));
+        localVariableTable2.add(new LocalVariableTRow((short) 11, (short) 7, (short) 1));
+        attrArray.add(new AttrCode("Db(0, 4);Db(1, 4);Set(0, 4, 0007);Set(0, 4, 0004);Pushv(0);Pushv(1);Sub();Pop(0);Outv(0, 0);Int(0, 0)", localVariableTable2));
 
         initLVContants();
         initLVFields();
@@ -479,7 +509,7 @@ public class FXMLACFCTab implements Initializable{
         for (byte aBt : bt) {
             bytes.add(aBt);
         }
-        for (int i = 0; i < fieldsArray.size(); i++) {  //Methods
+        for (int i = 0; i < methodArray.size(); i++) {  //Methods
             bytes.add((byte) 0); //af - они пока нелвые
             bytes.add((byte) 0); //af - они пока нелвые
             byteBuffer = ByteBuffer.allocate(2);
@@ -525,6 +555,32 @@ public class FXMLACFCTab implements Initializable{
                     for (byte aBt : bt) {
                         bytes.add(aBt);
                     }
+                    byteBuffer = ByteBuffer.allocate(2); //local_variable_table_size
+                    byteBuffer.putShort((short) attrCode.local_varialbe_table.size());
+                    bt = byteBuffer.array();
+                    for (byte aBt : bt) {
+                        bytes.add(aBt);
+                    }
+                    for (int j = 0; j < attrCode.local_varialbe_table.size(); j++) {
+                        byteBuffer = ByteBuffer.allocate(2); //name_index
+                        byteBuffer.putShort(attrCode.local_varialbe_table.get(j).name_index);
+                        bt = byteBuffer.array();
+                        for (byte aBt : bt) {
+                            bytes.add(aBt);
+                        }
+                        byteBuffer = ByteBuffer.allocate(2); //name_descriptor
+                        byteBuffer.putShort(attrCode.local_varialbe_table.get(j).name_decriptor);
+                        bt = byteBuffer.array();
+                        for (byte aBt : bt) {
+                            bytes.add(aBt);
+                        }
+                        byteBuffer = ByteBuffer.allocate(2); //index
+                        byteBuffer.putShort(attrCode.local_varialbe_table.get(j).index);
+                        bt = byteBuffer.array();
+                        for (byte aBt : bt) {
+                            bytes.add(aBt);
+                        }
+                    }
                     for (Byte anAsm : asm) {
                         bytes.add(anAsm);
                     }
@@ -569,7 +625,7 @@ public class FXMLACFCTab implements Initializable{
         StandartDialogs.DialogRetTwoField result = StandartDialogs.showTwoFieldDialog(new StandartDialogs.DialogTwoFieldDesctrption("name_index", "descriptor_index", "Field", ""));
         if (result != null) {
             lvFields.getItems().add(new RowModelSingle(String.valueOf(attrArray.size()) + "  " + AccessFlags.ACC_PUBLIC + "  name_index=" + result.f1 + "  descriptor_index=" + result.f2));
-            fieldsArray.add(new ClassField(AccessFlags.ACC_PUBLIC, Short.parseShort(result.f1), Short.parseShort(result.f2)));
+           // fieldsArray.add(new ClassField(AccessFlags.ACC_PUBLIC, Short.parseShort(result.f1), Short.parseShort(result.f2)));
         }
     }
 

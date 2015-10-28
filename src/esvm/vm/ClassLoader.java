@@ -4,6 +4,8 @@ import esvm.enums.AccessFlags;
 import esvm.vm.desc.ClassField;
 import esvm.vm.desc.ClassMethod;
 import esvm.vm.desc.attributes.AttrCode;
+import esvm.vm.desc.attributes.ClassAttribute;
+import esvm.vm.desc.attributes.LocalVariableTRow;
 import esvm.vm.desc.constpool.*;
 import esvm.vm.exceptions.ClassVerificationErrorException;
 import esvm.vm.instructions.*;
@@ -195,12 +197,12 @@ public class ClassLoader {
                 return 0;
             }
         }
-        if (pos == attrcpos) { //Attribute_count
+        if (pos == attrcpos - 2) { //Attribute_count
             byteBuffer = ByteBuffer.wrap(new byte[]{stream[pos], stream[pos + 1]});
             attrCount = byteBuffer.getShort();
             return 1;
         }
-        if (pos == attrcpos + 3) { //Attributes
+        if (pos == attrcpos + 1) { //Attributes
             if (attrCount != 0) {
                 parceAttribute(pos);
                 return 0;
@@ -256,6 +258,7 @@ public class ClassLoader {
             }
         }
 
+        ArrayList<ClassConstant> cp = Global.getInstance().counstant_pool;
         return offset;
     }
 
@@ -303,15 +306,15 @@ public class ClassLoader {
      * @return
      */
     private int parceMethods(int pos) {
-        int offset = 0;
+        int offset = 2;
         ByteBuffer byteBuffer;
 
         for (int i = 0; i < methodsCount; i++) {
-            byteBuffer = ByteBuffer.wrap(new byte[] {stream[pos + offset + 2], stream[pos + offset + 3]});
+            byteBuffer = ByteBuffer.wrap(new byte[] {stream[pos + offset], stream[pos + offset + 1]});
             short name = byteBuffer.getShort();
-            byteBuffer = ByteBuffer.wrap(new byte[] {stream[pos + offset + 4], stream[pos + offset + 5]});
+            byteBuffer = ByteBuffer.wrap(new byte[] {stream[pos + offset + 2], stream[pos + offset + 3]});
             short desc = byteBuffer.getShort();
-            byteBuffer = ByteBuffer.wrap(new byte[] {stream[pos + offset + 6], stream[pos + offset + 7]});
+            byteBuffer = ByteBuffer.wrap(new byte[] {stream[pos + offset + 4], stream[pos + offset + 5]});
             short code = byteBuffer.getShort();
             ClassMethod classMethod = new ClassMethod(AccessFlags.ACC_PUBLIC, name, desc, code);
             Global.getInstance().methods.add(classMethod);
@@ -338,16 +341,38 @@ public class ClassLoader {
             short tag = byteBuffer.getShort();
 
             if (tag == 0) {
+                AttrCode attrCode = new AttrCode();
+                attrCode.local_varialbe_table = new ArrayList<LocalVariableTRow>();
                 byteBuffer = ByteBuffer.wrap(new byte[]{stream[pos + offset + 1], stream[pos + offset + 2], stream[pos + offset + 3], stream[pos + offset + 4]});
                 btm = new byte[byteBuffer.getInt()];
-                for (int j = 0; j < btm.length; j++) {
-                    btm[j] = stream[pos + offset + 5 + j];
+                byteBuffer = ByteBuffer.wrap(new byte[]{stream[pos + offset + 5], stream[pos + offset + 6]});
+                int locvarlen = byteBuffer.getShort();
+                offset += 6;
+                for (int j = 0; j < locvarlen; j++) {
+                    LocalVariableTRow localVariableTRow = new LocalVariableTRow();
+                    byteBuffer = ByteBuffer.wrap(new byte[]{stream[pos + offset + 1], stream[pos + offset + 2]});
+                    localVariableTRow.name_index = byteBuffer.getShort();
+                    byteBuffer = ByteBuffer.wrap(new byte[]{stream[pos + offset + 3], stream[pos + offset + 4]});
+                    localVariableTRow.name_decriptor = byteBuffer.getShort();
+                    byteBuffer = ByteBuffer.wrap(new byte[]{stream[pos + offset + 5], stream[pos + offset + 6]});
+                    localVariableTRow.index = byteBuffer.getShort();
+                    attrCode.local_varialbe_table.add(localVariableTRow);
+                    offset += 6;
                 }
-                Global.getInstance().attributes.add(new AttrCode(String.valueOf(Global.getInstance().code.size())));
+                for (int j = 0; j < btm.length; j++) {
+                    btm[j] = stream[pos + offset + 1 + j];
+                }
+                attrCode.code = String.valueOf(Global.getInstance().code.size());
+                Global.getInstance().attributes.add(attrCode);
                 Global.getInstance().code.add(parceByteCode(btm));
-                offset += 5 + btm.length;
+                offset += btm.length + 2;
             }
+
+
         }
+        ArrayList<ClassAttribute> atr = Global.getInstance().attributes;
+        int a = 0;
+        a =  1 + 1;
     }
 
     /**
@@ -434,11 +459,11 @@ public class ClassLoader {
                     i = i + 0;
                     break;
 
-                case Movis.code:
+                case Method.code:
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2]});
-                    Movis movis = new Movis(arg1.getShort());
-                    movis.offset = i;
-                    instructions.add(movis);
+                    Method method = new Method(arg1.getShort());
+                    method.offset = i;
+                    instructions.add(method);
                     i = i + 2;
                     break;
 

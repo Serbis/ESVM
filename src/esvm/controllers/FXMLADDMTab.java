@@ -179,7 +179,36 @@ public class FXMLADDMTab implements Initializable{
      *
      */
     public void initStackPane() {
-        //App.getInstance().loadStackDupmFromVm(this);
+        mapsScroll.setContent(null);
+        ListView listView = new ListView();
+        MenuItem deleteMenuItem = new MenuItem("...");
+        ContextMenu contextMenu = new ContextMenu(deleteMenuItem);
+
+        deleteMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+
+            }
+        });
+
+        listView.setCellFactory(new Callback<javafx.scene.control.ListView<RowModelMaps>, ListCell<RowModelMaps>>() {
+            @Override
+            public ListCell<RowModelMaps> call(javafx.scene.control.ListView<RowModelMaps> param) {
+                return new XCell(contextMenu);
+            }
+        });
+        ArrayList<RowModelMaps> rowModels = new ArrayList<RowModelMaps>();
+        for (int i = 0; i < App.getInstance().esvm.getGlobal().varMap.size(); i++) {
+            String id = "id=" + String.valueOf(App.getInstance().esvm.getGlobal().varMap.get(i).id);
+            String type = "  type=";
+            String value = "  value=";
+            //dddd
+
+            rowModels.add(new RowModelMaps(id, type, value));
+        }
+
+        listView.getItems().addAll(rowModels);
+        mapsScroll.setContent(listView);
     }
 
     /**
@@ -207,6 +236,19 @@ public class FXMLADDMTab implements Initializable{
             @Override
             public void onInterrupt_interface_1_2(String text) {
                 putException(text);
+            }
+        });
+        App.getInstance().esvm.getInterruptsManager().setInterruptInterface_1_3(new InterruptsManager.InterruptInterface_1_3() {
+            @Override
+            public void onInterrupt_interface_1_3(int id) {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        AsmLine[] asmLines = App.getInstance().esvm.getDisassembler().getAsm(id);
+                        dehighlightAsmAll();
+                        initCodePane(asmLines);
+                    }
+                });
             }
         });
     }

@@ -118,8 +118,8 @@ public class Assembler {
                 selector.args = 0;
                 return selector;
 
-            case "Movis":
-                selector.code = Movis.code;
+            case "Method":
+                selector.code = Method.code;
                 selector.args = 1;
                 return selector;
 
@@ -273,7 +273,7 @@ public class Assembler {
             case Dec.code:
                 return toShort(arg);
 
-            case Movis.code:
+            case Method.code:
                 return toShort(arg);
 
             case Movos.code:
