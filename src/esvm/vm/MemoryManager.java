@@ -24,7 +24,7 @@ public class MemoryManager {
     private int memorysize;
     private int stacksizeinbyte;
     private int stackbytecounter = 0;
-    private int stackpointer = 0; //Указатель на вершину стека
+    private int stackpointer = -1; //Указатель на вершину стека
 
     public MemoryManager() {
 
@@ -324,6 +324,7 @@ public class MemoryManager {
     public StackObject pop() throws NullReferenceException{
         if (stackpointer >= 0) {
             StackObject stackObject = STACK.get(stackpointer);
+            STACK.remove(stackpointer);
             stackpointer--;
             stackbytecounter -= stackObject.data.length;
             return stackObject;
@@ -477,6 +478,16 @@ public class MemoryManager {
 
         return file;
     }*/
+
+    /**
+     * Возаращает массив стековыб объектов. Используется при отладке
+     * виртуальной машины
+     *
+     * @return содержимое стека
+     */
+    public ArrayList<StackObject> getSTACK() {
+        return STACK;
+    }
 
 
 }

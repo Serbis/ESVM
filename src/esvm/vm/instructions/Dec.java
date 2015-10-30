@@ -1,6 +1,7 @@
 package esvm.vm.instructions;
 
 import esvm.vm.Global;
+import esvm.vm.desc.StackObject;
 import esvm.vm.exceptions.MemoryNullBlockException;
 import esvm.vm.exceptions.MemoryOutOfRangeException;
 
@@ -20,21 +21,29 @@ public class Dec extends Instruction{
 
     public void exec() throws MemoryNullBlockException, MemoryOutOfRangeException {
         pointer = Global.getInstance().getVarPointerById(this.arg1);
+        StackObject.StackDataType type = Global.getInstance().getVarTypeById(arg1);
         byte[] vara = Global.getInstance().memoryManager.readBlock(pointer);
         byteBuffer = ByteBuffer.wrap(vara);
-        if (vara.length == 2) {
+        if (type == StackObject.StackDataType.SHORT) {
             byteBuffer = ByteBuffer.wrap(Global.getInstance().memoryManager.readBlock(pointer));
-            int vShort = byteBuffer.getShort();
-            vShort--;
+            short v = byteBuffer.getShort();
+            v--;
             byteBuffer = ByteBuffer.allocate(2);
-            byteBuffer.putInt(vShort);
+            byteBuffer.putShort(v);
             Global.getInstance().memoryManager.writeBlock(pointer, byteBuffer.array());
-        } else if (vara.length == 4) {
+        } else if (type == StackObject.StackDataType.INT) {
             byteBuffer = ByteBuffer.wrap(Global.getInstance().memoryManager.readBlock(pointer));
-            int vInt = byteBuffer.getInt();
-            vInt--;
+            int v = byteBuffer.getInt();
+            v--;
             byteBuffer = ByteBuffer.allocate(4);
-            byteBuffer.putInt(vInt);
+            byteBuffer.putInt(v);
+            Global.getInstance().memoryManager.writeBlock(pointer, byteBuffer.array());
+        } else if (type == StackObject.StackDataType.FLOAT) {
+            byteBuffer = ByteBuffer.wrap(Global.getInstance().memoryManager.readBlock(pointer));
+            float v = byteBuffer.getFloat();
+            v--;
+            byteBuffer = ByteBuffer.allocate(4);
+            byteBuffer.putFloat(v);
             Global.getInstance().memoryManager.writeBlock(pointer, byteBuffer.array());
         } else {
             //Тут нужно как-то сгенерировать проверку типов

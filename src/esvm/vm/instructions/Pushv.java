@@ -19,8 +19,8 @@ public class Pushv extends Instruction{
     }
 
     public void exec() throws MemoryNullBlockException, StackOverflowException {
-        pointer = Global.getInstance().getVarPointerById(this.arg1);
+        pointer = Global.getInstance().getVarPointerById(arg1);
         byteBuffer = ByteBuffer.wrap(Global.getInstance().memoryManager.readBlock(pointer));
-        //Global.getInstance().memoryManager.push(Global.getInstance().memoryManager.readBlock(pointer));
+        Global.getInstance().memoryManager.push(Global.getInstance().memoryManager.readBlock(pointer), Global.getInstance().getVarTypeById(arg1));
     }
 }

@@ -74,6 +74,22 @@ public class Global {
         return null;
     }
 
+    /**
+     * Возаращает тип переменной по ее id
+     *
+     * @param id идентефикатор переменной
+     * @return тип переменной
+     */
+    public StackObject.StackDataType getVarTypeById(int id) {
+        for (Var aVarMap : varMap) {
+            if (aVarMap.id == id) {
+                return aVarMap.type;
+            }
+        }
+
+        return null;
+    }
+
     private void initPorts() {
         for (int i = 0; i < ports.length; i++) {
             ports[i] = 0;

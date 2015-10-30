@@ -1,6 +1,7 @@
 package esvm.vm.instructions;
 
 import esvm.vm.Global;
+import esvm.vm.exceptions.IncompatibleTypesException;
 import esvm.vm.exceptions.MemoryNullBlockException;
 import esvm.vm.exceptions.MemoryOutOfRangeException;
 
@@ -18,18 +19,22 @@ public class Xchg extends Instruction{
         asm = "Xchg";
     }
 
-    public void exec() throws MemoryNullBlockException, MemoryOutOfRangeException {
+    public void exec() throws MemoryNullBlockException, MemoryOutOfRangeException, IncompatibleTypesException {
         pointer = Global.getInstance().getVarPointerById(this.arg1);
         pointer2 = Global.getInstance().getVarPointerById(this.arg2);
         byte[] var1b = Global.getInstance().memoryManager.readBlock(pointer);
         byte[] var2b = Global.getInstance().memoryManager.readBlock(pointer2);
         if (var1b.length != var2b.length) {
-            //Тут исключение несовместимости типов
+            throw new IncompatibleTypesException("...");
         }
         byte[] median = var1b;
         var1b = var2b;
         var2b = median;
         Global.getInstance().memoryManager.writeBlock(pointer, var1b);
         Global.getInstance().memoryManager.writeBlock(pointer, var2b);
+
+
+
+
     }
 }

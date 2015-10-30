@@ -75,7 +75,8 @@ public class ExecutorThread implements Runnable {
                         break;
 
                     case "Mul":
-
+                        Mul mul = (Mul) Global.getInstance().code.get(isn).get(i);
+                        mul.exec();
                         break;
 
                     case "IMul":
@@ -121,11 +122,13 @@ public class ExecutorThread implements Runnable {
                         break;
 
                     case "Div":
-
+                        Div div = (Div) Global.getInstance().code.get(isn).get(i);
+                        div.exec();
                         break;
 
                     case "IDiv":
-
+                        //IDiv iDiv = (IDiv) Global.getInstance().code.get(isn).get(i);
+                        //iDiv.exec();
                         break;
 
                     case "Je": //Если равно

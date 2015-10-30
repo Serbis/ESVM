@@ -7,6 +7,7 @@ import esvm.models.RowModelMaps;
 import esvm.models.XCell;
 import esvm.vm.InterruptsManager;
 import esvm.vm.desc.AsmLine;
+import esvm.vm.desc.StackObject;
 import esvm.vm.exceptions.MemoryNullBlockException;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -35,8 +36,8 @@ import java.util.ResourceBundle;
 public class FXMLADDMTab implements Initializable{
     @FXML private ScrollPane asmScroll;
     @FXML private ScrollPane binScroll;
-    @FXML private ScrollPane mapsScroll;
-    @FXML private ScrollPane stackdumpScroll;
+    @FXML private AnchorPane anchorMapPane;
+    @FXML private AnchorPane stackdumpAnchor;
     @FXML private TextArea taExceptions;
 
     private static FXMLADDMTab instance;
@@ -179,7 +180,7 @@ public class FXMLADDMTab implements Initializable{
      *
      */
     public void initStackPane() {
-        mapsScroll.setContent(null);
+        stackdumpAnchor.getChildren().removeAll();
         ListView listView = new ListView();
         MenuItem deleteMenuItem = new MenuItem("...");
         ContextMenu contextMenu = new ContextMenu(deleteMenuItem);
@@ -198,17 +199,34 @@ public class FXMLADDMTab implements Initializable{
             }
         });
         ArrayList<RowModelMaps> rowModels = new ArrayList<RowModelMaps>();
-        for (int i = 0; i < App.getInstance().esvm.getGlobal().varMap.size(); i++) {
-            String id = "id=" + String.valueOf(App.getInstance().esvm.getGlobal().varMap.get(i).id);
-            String type = "  type=";
-            String value = "  value=";
-            //dddd
+        ArrayList<StackObject> stack = App.getInstance().esvm.getMemoryManager().getSTACK();
+        if (stack.size() < 1) return; //Проверяем ну пустоту
+        for (int i = 0; i < stack.size(); i++) {
+            String type = "type=" + stack.get(i).stackDataType.toString();
+            String value = " value=";
+            ByteBuffer byteBuffer = ByteBuffer.wrap(stack.get(i).data);
+            if (stack.get(i).stackDataType.equals(StackObject.StackDataType.INT)) {
+                value += String.valueOf(byteBuffer.getInt());
+            } else if (stack.get(i).stackDataType.equals(StackObject.StackDataType.SHORT)) {
+                value += String.valueOf(byteBuffer.getShort());
+            } else if (stack.get(i).stackDataType.equals(StackObject.StackDataType.FLOAT)) {
+                value += String.valueOf(byteBuffer.getFloat());
+            } else if (stack.get(i).stackDataType.equals(StackObject.StackDataType.BYTE)) {
+                value += String.valueOf(stack.get(i).data[0]);
+            } else if (stack.get(i).stackDataType.equals(StackObject.StackDataType.BOOLEAN)) {
+                if (stack.get(i).data[0] == 0)
+                    value += "false";
+                else
+                    value += "true";
+            } else if (stack.get(i).stackDataType.equals(StackObject.StackDataType.STRING)) {
+                value += String.valueOf(new String(stack.get(i).data));
+            }
 
-            rowModels.add(new RowModelMaps(id, type, value));
+            rowModels.add(new RowModelMaps("", type, value));
         }
 
         listView.getItems().addAll(rowModels);
-        mapsScroll.setContent(listView);
+        stackdumpAnchor.getChildren().add(listView);
     }
 
     /**
@@ -274,7 +292,7 @@ public class FXMLADDMTab implements Initializable{
      *
      */
     private void initMapPane() {
-        mapsScroll.setContent(null);
+        anchorMapPane.getChildren().removeAll();
         ListView listView = new ListView();
         MenuItem deleteMenuItem = new MenuItem("...");
         ContextMenu contextMenu = new ContextMenu(deleteMenuItem);
@@ -295,20 +313,26 @@ public class FXMLADDMTab implements Initializable{
         ArrayList<RowModelMaps> rowModels = new ArrayList<RowModelMaps>();
         for (int i = 0; i < App.getInstance().esvm.getGlobal().varMap.size(); i++) {
             String id = "id=" + String.valueOf(App.getInstance().esvm.getGlobal().varMap.get(i).id);
-            String type = "  type=";
+            String type = "  type=" + App.getInstance().esvm.getGlobal().varMap.get(i).type.toString();
             String value = "  value=";
             try {
                 byte[] vb = App.getInstance().esvm.getMemoryManager().readBlock(App.getInstance().esvm.getGlobal().varMap.get(i).pointer);
                 ByteBuffer byteBuffer = ByteBuffer.wrap(vb);
-                if (vb.length == 4) {
-                    type += "int";
+                if (App.getInstance().esvm.getGlobal().varMap.get(i).type.equals(StackObject.StackDataType.INT)) {
                     value += String.valueOf(byteBuffer.getInt());
-                } else if (vb.length == 2) {
-                    type += "short";
+                } else if (App.getInstance().esvm.getGlobal().varMap.get(i).type.equals(StackObject.StackDataType.FLOAT)) {
+                    value += String.valueOf(byteBuffer.getFloat());
+                } else if (App.getInstance().esvm.getGlobal().varMap.get(i).type.equals(StackObject.StackDataType.SHORT)) {
                     value += String.valueOf(byteBuffer.getShort());
-                } else if (vb.length == 1) {
-                    value += String.valueOf(byteBuffer.getChar());
-                    type += "byte";
+                } else if (App.getInstance().esvm.getGlobal().varMap.get(i).type.equals(StackObject.StackDataType.BOOLEAN)) {
+                    if (vb[0] == 0)
+                        value += "false";
+                    else
+                        value += "true";
+                } else if (App.getInstance().esvm.getGlobal().varMap.get(i).type.equals(StackObject.StackDataType.BYTE)) {
+                    value += String.valueOf(vb[0]);
+                } else if (App.getInstance().esvm.getGlobal().varMap.get(i).type.equals(StackObject.StackDataType.STRING)) {
+                    value += String.valueOf(new String(vb));
                 } else {
                     value += "undef";
                     for (byte aVb : vb) {
@@ -327,7 +351,7 @@ public class FXMLADDMTab implements Initializable{
         }
 
         listView.getItems().addAll(rowModels);
-        mapsScroll.setContent(listView);
+        anchorMapPane.getChildren().add(listView);
     }
 
     /**
@@ -359,7 +383,7 @@ public class FXMLADDMTab implements Initializable{
      * @param vBox vBox
      */
     public void setStackDumpPane(VBox vBox) {
-        stackdumpScroll.setContent(vBox);
+        //stackdumpScroll.setContent(vBox);
     }
 
 

@@ -102,11 +102,44 @@ public class FXMLACFCTab implements Initializable{
         ArrayList<LocalVariableTRow> localVariableTable1 = new ArrayList<LocalVariableTRow>();
         localVariableTable1.add(new LocalVariableTRow((short) 8, (short) 7, (short) 0));
         localVariableTable1.add(new LocalVariableTRow((short) 9, (short) 7, (short) 1));
-        attrArray.add(new AttrCode("Int(0, 1);Method(1);", localVariableTable1));
+        attrArray.add(new AttrCode(
+                //"Int(0, 0);" +
+                       // "Db(0, 4, 1);" +
+                       // "Db(1, 4, 2);" +
+                       // "Db(2, 2, 6);" +
+                        "Db(1, 4, 1);" +
+                                "Db(2, 4, 1);" +
+                                "Set(1, 4, 00000001);" +
+                                "Set(2, 4, 3EAAAAAB);" +
+                                "Pushv(1);" +
+                                "Pushv(2);" +
+                                "Push(1, 00000003);" +
+                                "Push(1, 00000001);" +
+                                "Sub();" +
+                                "Push(1, 00000001);" +
+                                "Push(2, 3EAAAAAB);" +
+                                "Sub();" +
+                                "Push(2, 3EAAAAAB);" +
+                                "Push(2, 3EAAAAAB);" +
+                                "Sub();" +
+                                "Push(6, 0003);" +
+                                "Push(2, 3EAAAAAB);" +
+                                "Sub();" +
+                                "Push(2, 3EAAAAAB);" +
+                                "Push(6, 0002);" +
+                                "Sub();" +
+
+                        "Push(2, 3EAAAAAB);" ,
+                       // "Dec(0);Dec(0);" +
+                       // "Dec(1);Dec(1);" +
+                       // "Dec(2);Dec(2);" +
+                       // "Push(3, 00);" +
+                       // "Push(4, 00);" +
+                       /* "Method(1);",*/ localVariableTable1));
         ArrayList<LocalVariableTRow> localVariableTable2 = new ArrayList<LocalVariableTRow>();
         localVariableTable2.add(new LocalVariableTRow((short) 10, (short) 7, (short) 0));
         localVariableTable2.add(new LocalVariableTRow((short) 11, (short) 7, (short) 1));
-        attrArray.add(new AttrCode("Db(0, 4);Db(1, 4);Set(0, 4, 0007);Set(0, 4, 0004);Pushv(0);Pushv(1);Sub();Pop(0);Outv(0, 0);Int(0, 0)", localVariableTable2));
+        attrArray.add(new AttrCode("Db(0, 4, 1);Db(1, 4, 2);", localVariableTable2));
 
         initLVContants();
         initLVFields();
@@ -544,7 +577,7 @@ public class FXMLACFCTab implements Initializable{
                     byteBuffer = ByteBuffer.allocate(2);
                     byteBuffer.putShort(Short.parseShort(String.valueOf(attrCode.tag)));
                     bt = byteBuffer.array();
-                    for (byte aBt : bt) {
+                    for (byte aBt : bt) { //Порядковый номер аттрибута
                         bytes.add(aBt);
                     }
                     Assembler assembler = new Assembler();

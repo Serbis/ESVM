@@ -7,6 +7,7 @@ public class Var {
     public short id;
     public Pointer pointer;
     public int size;
+    public StackObject.StackDataType type;
 
     public Var() {
 

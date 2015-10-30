@@ -331,7 +331,7 @@ public class ClassLoader {
      *
      * @param pos
      */
-    private void parceAttribute(int pos) {
+    private void parceAttribute(int pos) throws ClassVerificationErrorException {
         int offset = 0;
         ByteBuffer byteBuffer;
         byte[] btm;
@@ -364,7 +364,7 @@ public class ClassLoader {
                 }
                 attrCode.code = String.valueOf(Global.getInstance().code.size());
                 Global.getInstance().attributes.add(attrCode);
-                Global.getInstance().code.add(parceByteCode(btm));
+                Global.getInstance().code.add(parceByteCode(btm, pos + offset + 1));
                 offset += btm.length + 2;
             }
 
@@ -381,41 +381,67 @@ public class ClassLoader {
      * @param bytes
      * @return
      */
-    private ArrayList<Instruction> parceByteCode(byte[] bytes){
+    private ArrayList<Instruction> parceByteCode(byte[] bytes, int offset) throws ClassVerificationErrorException {
         ByteBuffer arg1;
         ByteBuffer arg2;
         ByteBuffer arg3;
         ArrayList<Instruction> instructions = new ArrayList<Instruction>();
+        byte[] data;
         
         for (int i = 0; i < bytes.length; i++) {
             byte bt = bytes[i];
             switch (bt) {
                 case Add.code:
                     Add add = new Add();
-                    add.offset = i;
+                    add.offset = offset + i;
                     instructions.add(add);
                     i = i + 0;
                     break;
 
                 case Sub.code:
                     Sub sub = new Sub();
-                    sub.offset = i;
+                    sub.offset = offset + i;
                     instructions.add(sub);
                     i = i + 0;
                     break;
 
                 case Push.code:
-                    arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2], bytes[i + 3], bytes[i + 4]});
-                    Push push = new Push(arg1.getInt());
-                    push.offset = i;
+                    int it = 0;
+                    byte type = bytes[i + 1];
+                    if (type == 1) {
+                        data = new byte[4]; //Int
+                        it = 5;
+                    } else if (type == 2) {
+                        data = new byte[4]; //Float
+                        it = 5;
+                    } else if (type == 3) {
+                        data = new byte[1]; //Bool
+                        it = 2;
+                    } else if (type == 4) {
+                        data = new byte[1]; //Byte
+                        it = 2;
+                    } else if (type == 5) {
+                        data = new byte[1]; //String НЕ ДОДЕЛАНО
+                        it = 2;
+                    } else if (type == 6) {
+                        data = new byte[2]; //Short
+                        it = 3;
+                    }else {
+                        throw new ClassVerificationErrorException("...");
+                    }
+                    for (int o = 0; o < data.length; o++) {
+                        data[o] = bytes[i + 2 + o];
+                    }
+                    Push push = new Push(type, data);
+                    push.offset = offset + i;
                     instructions.add(push);
-                    i = i + 4;
+                    i = i + it;
                     break;
 
                 case Pop.code:
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2]});
                     Pop pop = new Pop(arg1.getShort());
-                    pop.offset = i;
+                    pop.offset = offset + i;
                     instructions.add(pop);
                     i = i + 2;
                     break;
@@ -424,7 +450,7 @@ public class ClassLoader {
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2]});
                     arg2 = ByteBuffer.wrap(new byte[]{bytes[i + 3], bytes[i + 4]});
                     Cmp cmp = new Cmp(arg1.getShort(), arg2.getShort());
-                    cmp.offset = i;
+                    cmp.offset = offset + i;
                     instructions.add(cmp);
                     i = i + 4;
                     break;
@@ -432,7 +458,7 @@ public class ClassLoader {
                 case Inc.code:
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2]});
                     Inc inc = new Inc(arg1.getShort());
-                    inc.offset = i;
+                    inc.offset = offset + i;
                     instructions.add(inc);
                     i = i + 2;
                     break;
@@ -440,21 +466,21 @@ public class ClassLoader {
                 case Dec.code:
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2]});
                     Dec dec = new Dec(arg1.getShort());
-                    dec.offset = i;
+                    dec.offset = offset + i;
                     instructions.add(dec);
                     i = i + 2;
                     break;
 
                 case Mul.code:
                     Mul mul = new Mul();
-                    mul.offset = i;
+                    mul.offset = offset + i;
                     instructions.add(mul);
                     i = i + 0;
                     break;
 
                 case IMul.code:
                     IMul iMul = new IMul();
-                    iMul.offset = i;
+                    iMul.offset = offset + i;
                     instructions.add(iMul);
                     i = i + 0;
                     break;
@@ -462,7 +488,7 @@ public class ClassLoader {
                 case Method.code:
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2]});
                     Method method = new Method(arg1.getShort());
-                    method.offset = i;
+                    method.offset = offset + i;
                     instructions.add(method);
                     i = i + 2;
                     break;
@@ -470,7 +496,7 @@ public class ClassLoader {
                 case Movos.code:
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2]});
                     Movos movos = new Movos(arg1.getShort());
-                    movos.offset = i;
+                    movos.offset = offset + i;
                     instructions.add(movos);
                     i = i + 2;
                     break;
@@ -479,7 +505,7 @@ public class ClassLoader {
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2]});
                     arg2 = ByteBuffer.wrap(new byte[]{bytes[i + 3], bytes[i + 4]});
                     Xchg xchg = new Xchg(arg1.getShort(), arg2.getShort());
-                    xchg.offset = i;
+                    xchg.offset = offset + i;
                     instructions.add(xchg);
                     i = i + 4;
                     break;
@@ -488,14 +514,14 @@ public class ClassLoader {
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2]});
                     arg2 = ByteBuffer.wrap(new byte[]{bytes[i + 3], bytes[i + 4]});
                     Lea lea = new Lea(arg1.getShort(), arg2.getShort());
-                    lea.offset = i;
+                    lea.offset = offset + i;
                     instructions.add(lea);
                     i = i + 4;
                     break;
 
                 case Int.code:
                     Int iint = new Int(bytes[i + 1], bytes[i + 2]);
-                    iint.offset = i;
+                    iint.offset = offset + i;
                     instructions.add(iint);
                     i = i + 2;
                     break;
@@ -504,7 +530,7 @@ public class ClassLoader {
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2]});
                     arg2 = ByteBuffer.wrap(new byte[]{bytes[i + 3], bytes[i + 4], bytes[i + 5], bytes[i + 6]});
                     Loop loop = new Loop(arg1.getShort(), arg2.getInt());
-                    loop.offset = i;
+                    loop.offset = offset + i;
                     instructions.add(loop);
                     i = i + 6;
                     break;
@@ -512,21 +538,21 @@ public class ClassLoader {
                 case Jmp.code:
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2], bytes[i + 3], bytes[i + 4]});
                     Jmp jmp = new Jmp(arg1.getInt());
-                    jmp.offset = i;
+                    jmp.offset = offset + i;
                     instructions.add(jmp);
                     i = i + 4;
                     break;
 
                 case Div.code:
                     Div div = new Div();
-                    div.offset = i;
+                    div.offset = offset + i;
                     instructions.add(div);
                     i = i + 0;
                     break;
 
                 case IDiv.code:
                     IDiv iDiv = new IDiv();
-                    iDiv.offset = i;
+                    iDiv.offset = offset + i;
                     instructions.add(iDiv);
                     i = i + 0;
                     break;
@@ -534,7 +560,7 @@ public class ClassLoader {
                 case Je.code:
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2], bytes[i + 3], bytes[i + 4]});
                     Je je = new Je(arg1.getInt());
-                    je.offset = i;
+                    je.offset = offset + i;
                     instructions.add(je);
                     i = i + 4;
                     break;
@@ -542,7 +568,7 @@ public class ClassLoader {
                 case Jz.code:
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2], bytes[i + 3], bytes[i + 4]});
                     Jz jz = new Jz(arg1.getInt());
-                    jz.offset = i;
+                    jz.offset = offset + i;
                     instructions.add(jz);
                     i = i + 4;
                     break;
@@ -550,7 +576,7 @@ public class ClassLoader {
                 case Jg.code:
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2], bytes[i + 3], bytes[i + 4]});
                     Jg jg = new Jg(arg1.getInt());
-                    jg.offset = i;
+                    jg.offset = offset + i;
                     instructions.add(jg);
                     i = i + 4;
                     break;
@@ -558,7 +584,7 @@ public class ClassLoader {
                 case Jge.code:
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2], bytes[i + 3], bytes[i + 4]});
                     Jge jge = new Jge(arg1.getInt());
-                    jge.offset = i;
+                    jge.offset = offset + i;
                     instructions.add(jge);
                     i = i + 4;
                     break;
@@ -566,7 +592,7 @@ public class ClassLoader {
                 case Jl.code:
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2], bytes[i + 3], bytes[i + 4]});
                     Jl jl = new Jl(arg1.getInt());
-                    jl.offset = i;
+                    jl.offset = offset + i;
                     instructions.add(jl);
                     i = i + 4;
                     break;
@@ -574,7 +600,7 @@ public class ClassLoader {
                 case Jle.code:
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2], bytes[i + 3], bytes[i + 4]});
                     Jle jle = new Jle(arg1.getInt());
-                    jle.offset = i;
+                    jle.offset = offset + i;
                     instructions.add(jle);
                     i = i + 4;
                     break;
@@ -582,7 +608,7 @@ public class ClassLoader {
                 case Jne.code:
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2], bytes[i + 3], bytes[i + 4]});
                     Jne jne = new Jne(arg1.getInt());
-                    jne.offset = i;
+                    jne.offset = offset + i;
                     instructions.add(jne);
                     i = i + 4;
                     break;
@@ -590,7 +616,7 @@ public class ClassLoader {
                 case Jnge.code:
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2], bytes[i + 3], bytes[i + 4]});
                     Jnge jnge = new Jnge(arg1.getInt());
-                    jnge.offset = i;
+                    jnge.offset = offset + i;
                     instructions.add(jnge);
                     i = i + 4;
                     break;
@@ -598,7 +624,7 @@ public class ClassLoader {
                 case Jnl.code:
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2], bytes[i + 3], bytes[i + 4]});
                     Jnl jnl = new Jnl(arg1.getInt());
-                    jnl.offset = i;
+                    jnl.offset = offset + i;
                     instructions.add(jnl);
                     i = i + 4;
                     break;
@@ -606,7 +632,7 @@ public class ClassLoader {
                 case Jnle.code:
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2], bytes[i + 3], bytes[i + 4]});
                     Jnle jnle = new Jnle(arg1.getInt());
-                    jnle.offset = i;
+                    jnle.offset = offset + i;
                     instructions.add(jnle);
                     i = i + 4;
                     break;
@@ -614,7 +640,7 @@ public class ClassLoader {
                 case Out.code:
                     arg2 = ByteBuffer.wrap(new byte[]{bytes[i + 2], bytes[i + 3], bytes[i + 4], bytes[i + 5]});
                     Out out = new Out(bytes[i + 1], arg2.getInt());
-                    out.offset = i;
+                    out.offset = offset + i;
                     instructions.add(out);
                     i = i + 5;
                     break;
@@ -622,7 +648,7 @@ public class ClassLoader {
                 case Inp.code:
                     arg2 = ByteBuffer.wrap(new byte[]{bytes[i + 2], bytes[i + 3]});
                     Inp inp = new Inp(bytes[i + 1], arg2.getShort());
-                    inp.offset = i;
+                    inp.offset = offset + i;
                     instructions.add(inp);
                     i = i + 3;
                     break;
@@ -630,20 +656,20 @@ public class ClassLoader {
                 case Db.code:
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2]});
                     arg2 = ByteBuffer.wrap(new byte[]{bytes[i + 3], bytes[i + 4]});
-                    Db db = new Db(arg1.getShort(), arg2.getShort());
-                    db.offset = i;
+                    Db db = new Db(arg1.getShort(), arg2.getShort(), bytes[i + 5]);
+                    db.offset = offset + i;
                     instructions.add(db);
-                    i = i + 4;
+                    i = i + 5;
                     break;
 
                 case Set.code:
                     set = new Set();
-                    set.offset = i;
+                    set.offset = offset + i;
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2]});
                     arg2 = ByteBuffer.wrap(new byte[]{bytes[i + 3], bytes[i + 4], bytes[i + 5], bytes[i + 6]});
                     set.arg1 = arg1.getShort();
                     set.arg2 = arg2.getInt();
-                    byte[] data = new byte[set.arg2];
+                    data = new byte[set.arg2];
                     for (int o = 0; o < data.length; o++) {
                         data[o] = bytes[i + 7 + o];
                     }
@@ -655,7 +681,7 @@ public class ClassLoader {
                 case Pushv.code:
                     arg1 = ByteBuffer.wrap(new byte[]{bytes[i + 1], bytes[i + 2]});
                     Pushv pushv = new Pushv(arg1.getShort());
-                    pushv.offset = i;
+                    pushv.offset = offset + i;
                     instructions.add(pushv);
                     i = i + 2;
                     break;
@@ -663,17 +689,17 @@ public class ClassLoader {
                 case Outv.code:
                     arg2 = ByteBuffer.wrap(new byte[]{bytes[i + 2], bytes[i + 3]});
                     Outv outv = new Outv(bytes[i + 1], arg2.getShort());
-                    outv.offset = i;
+                    outv.offset = offset + i;
                     instructions.add(outv);
                     i = i + 3;
                     break;
 
                 default:
-                    try {
-                        throw new ClassVerificationErrorException("Verification error bytecode at offset " + String.valueOf(i));
-                    } catch (ClassVerificationErrorException e) {
-                        e.printStackTrace();
-                    }
+                   // try {
+                        throw new ClassVerificationErrorException("Verification error bytecode at instruction " + String.valueOf(instructions.size() + 1));
+                    //} catch (ClassVerificationErrorException e) {
+                   //     e.printStackTrace();
+                    //}
 
             }
         }

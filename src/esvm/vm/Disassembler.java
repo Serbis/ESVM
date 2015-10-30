@@ -1,5 +1,6 @@
 package esvm.vm;
 
+import com.sun.org.apache.xerces.internal.impl.dv.util.HexBin;
 import esvm.vm.desc.AsmLine;
 import esvm.vm.instructions.*;
 
@@ -24,6 +25,7 @@ public class Disassembler {
     public AsmLine[] getAsm(int mid) {
         ArrayList<Instruction> lociset = Global.getInstance().code.get(mid);
         AsmLine[] asmLines = new AsmLine[lociset.size()];
+        String data;
 
         for (int i = 0; i < lociset.size(); i++) {
             AsmLine asmLine = new AsmLine(lociset.get(i).asm, lociset.get(i).offset);
@@ -38,7 +40,8 @@ public class Disassembler {
 
                 case "Push":
                     Push push = (Push) lociset.get(i);
-                    asmLine.com += "(" + String.valueOf(push.arg1) + ");";
+                    data = HexBin.encode(push.arg2);
+                    asmLine.com += "(" + String.valueOf(push.arg1) + ", " + data + ");";
                     break;
 
                 case "Pop":
@@ -174,19 +177,12 @@ public class Disassembler {
 
                 case "Db":
                     Db db = (Db)  lociset.get(i);
-                    asmLine.com += "(" + String.valueOf(db.arg1) + ", " + db.arg2 + ");";
+                    asmLine.com += "(" + String.valueOf(db.arg1) + ", " + db.arg2 + ", " + db.arg3 + ");";
                     break;
 
                 case "Set":
                     Set set = (Set)  lociset.get(i);
-                    String data = "";
-                    for (int o = 0; o < set.arg3.length; o++) {
-                        String hex = Integer.toHexString(set.arg3[o]).toUpperCase();
-                        if (hex.length() == 1) {
-                            hex = "0" + hex;
-                        }
-                        data += hex + " ";
-                    }
+                    data = HexBin.encode(set.arg3);
                     asmLine.com += "(" + String.valueOf(set.arg1) + ", " + set.arg2 + ", " + data + ");";
                     break;
 

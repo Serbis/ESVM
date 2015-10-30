@@ -1,6 +1,8 @@
 package esvm.vm.instructions;
 
 import esvm.vm.Global;
+import esvm.vm.desc.StackObject;
+import esvm.vm.exceptions.IncompatibleTypesException;
 import esvm.vm.exceptions.MemoryNullBlockException;
 
 import java.nio.ByteBuffer;
@@ -19,7 +21,9 @@ public class Cmp extends Instruction{
         asm = "Cmp";
     }
 
-    public void exec() throws MemoryNullBlockException {
+    public void exec() throws MemoryNullBlockException, IncompatibleTypesException {
+        if (Global.getInstance().getVarTypeById(arg1) != Global.getInstance().getVarTypeById(arg2))
+            throw new IncompatibleTypesException("...");
         pointer = Global.getInstance().getVarPointerById(this.arg1);
         pointer2 = Global.getInstance().getVarPointerById(this.arg2);
         byte[] var1 = Global.getInstance().memoryManager.readBlock(pointer);
@@ -29,7 +33,19 @@ public class Cmp extends Instruction{
             if (var1.length == var2.length) {
                 Global.getInstance().boolOpFloag = Global.BoolLogic.EQUAL;
 
-                if (var1.length == 4) {
+                if (Global.getInstance().getVarTypeById(arg1).equals(StackObject.StackDataType.FLOAT)) {
+                    float a = byteBuffer.getFloat();
+                    byteBuffer = ByteBuffer.wrap(var2);
+                    float b = byteBuffer.getFloat();
+                    float res = a - b;
+                    if (res == 0) {
+                        Global.getInstance().boolOpFloag = Global.BoolLogic.EQUAL;
+                    } else if (res > 0) {
+                        Global.getInstance().boolOpFloag = Global.BoolLogic.GROSS;
+                    } else if (res < 0) {
+                        Global.getInstance().boolOpFloag = Global.BoolLogic.LESS;
+                    }
+                } else if (Global.getInstance().getVarTypeById(arg1).equals(StackObject.StackDataType.INT)) {
                     int a = byteBuffer.getInt();
                     byteBuffer = ByteBuffer.wrap(var2);
                     int b = byteBuffer.getInt();
@@ -41,7 +57,7 @@ public class Cmp extends Instruction{
                     } else if (res < 0) {
                         Global.getInstance().boolOpFloag = Global.BoolLogic.LESS;
                     }
-                } else if (var1.length == 2) {
+                } else if (Global.getInstance().getVarTypeById(arg1).equals(StackObject.StackDataType.SHORT)) {
                     short a = byteBuffer.getShort();
                     byteBuffer = ByteBuffer.wrap(var2);
                     short b = byteBuffer.getShort();
@@ -53,7 +69,15 @@ public class Cmp extends Instruction{
                     } else if (res < 0) {
                         Global.getInstance().boolOpFloag = Global.BoolLogic.LESS;
                     }
-                } else {
+                } else if (Global.getInstance().getVarTypeById(arg1).equals(StackObject.StackDataType.BYTE) ||
+                        Global.getInstance().getVarTypeById(arg1).equals(StackObject.StackDataType.BOOLEAN) ||
+                        Global.getInstance().getVarTypeById(arg1).equals(StackObject.StackDataType.STRING)) {
+                    if (var1 == var2) {
+                        Global.getInstance().boolOpFloag = Global.BoolLogic.EQUAL;
+                    } else {
+                        Global.getInstance().boolOpFloag = Global.BoolLogic.NOT_EQUAL;
+                    }
+                }else {
                     //Исключение
                 }
             } else {

@@ -14,13 +14,9 @@
                <children>
                   <SplitPane dividerPositions="0.15, 0.35, 0.72" prefHeight="600.0" prefWidth="1300.0">
                     <items>
-                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="200.0">
+                      <AnchorPane fx:id="anchorMapPane" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="200.0">
                            <children>
-                              <ScrollPane fx:id="mapsScroll" pannable="true" prefHeight="590.0" prefWidth="200.0">
-                                <content>
-                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="590.0" prefWidth="200.0" />
-                                </content>
-                              </ScrollPane>
+
                            </children>
                         </AnchorPane>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
@@ -42,13 +38,9 @@
                            </children>
                         </AnchorPane>
             
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                        <AnchorPane fx:id="stackdumpAnchor" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                             <children>
-                                <ScrollPane fx:id="stackdumpScroll" pannable="true" prefHeight="598.0" prefWidth="350.0">
-                                    <content>
-                                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="598.0" prefWidth="350.0" />
-                                    </content>
-                                </ScrollPane>
+
                             </children>
                         </AnchorPane>
                     </items>

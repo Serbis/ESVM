@@ -2,6 +2,7 @@ package esvm.vm.compiler;
 
 import esvm.vm.instructions.*;
 
+import javax.xml.bind.DatatypeConverter;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Objects;
@@ -85,7 +86,7 @@ public class Assembler {
 
             case "Push":
                 selector.code = Push.code;
-                selector.args = 1;
+                selector.args = 2;
                 return selector;
 
             case "Pop":
@@ -225,7 +226,7 @@ public class Assembler {
 
             case "Db":
                 selector.code = Db.code;
-                selector.args = 2;
+                selector.args = 3;
                 return selector;
 
             case "Set":
@@ -259,7 +260,11 @@ public class Assembler {
         ByteBuffer byteBuffer;
         switch (instCode) {
             case Push.code:
-                return toInt(arg);
+                if (argnum == 0) {
+                    return toByte(arg);
+                } else {
+                    return toBytes(arg);
+                }
 
             case Pop.code:
                 return toShort(arg);
@@ -343,7 +348,13 @@ public class Assembler {
                 }
 
             case Db.code:
-                return toShort(arg);
+                if (argnum == 0) {
+                    return toShort(arg);
+                } else if (argnum == 1) {
+                    return toShort(arg);
+                } else {
+                    return toByte(arg);
+                }
 
             case Set.code:
                 if (argnum == 0) {
@@ -351,7 +362,7 @@ public class Assembler {
                 } else if (argnum == 1) {
                     return toInt(arg);
                 } else {
-                    return arg.getBytes();
+                    return toBytes(arg);
                 }
 
             case Pushv.code:
@@ -381,6 +392,16 @@ public class Assembler {
 
     private byte[] toByte(String arg) {
         return new byte[] {Byte.parseByte(arg)};
+    }
+
+    /**
+     * Конвертирует hex строку в массив байт
+     *
+     * @param hexs hex строка
+     * @return массив байт
+     */
+    private byte[] toBytes(String hexs) {
+        return DatatypeConverter.parseHexBinary(hexs);
     }
 
 
